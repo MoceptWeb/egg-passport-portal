@@ -252,11 +252,11 @@ see [config/config.default.js](config/config.default.js) for more detail.
 config.mysql = {
     clients: {
       user: {
-        host: '172.16.1.13',
+        host: '',
         port: 3306,
-        user: 'jiayoubao',
-        password: 'root1234',
-        database: "db_jyb_test"
+        user: '',
+        password: '',
+        database: ""
       }
     },
     app: true
