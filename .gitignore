@@ -1,0 +1,17 @@
+logs/
+npm-debug.log
+node_modules/
+coverage/
+.idea/
+.vscode/
+config/config.uat.js
+config/config.local.js
+config/config.prod.js
+config/config.test.js
+readme.1.md
+desc/
+run/
+desc/
+.DS_Store
+*.swp
+

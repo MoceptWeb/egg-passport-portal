@@ -1,0 +1,66 @@
+{
+  "name": "@node/egg-passport-jyb",
+  "version": "0.0.7",
+  "description": "egg, egg-plugin, passport",
+  "eggPlugin": {
+    "name": "passportJyb"
+  },
+  "keywords": [
+    "egg",
+    "eggPlugin",
+    "egg-plugin"
+  ],
+  "dependencies": {
+    "md5": "^2.2.1",
+    "sha1": "^1.1.1"
+  },
+  "devDependencies": {
+    "autod": "^3.0.0",
+    "autod-egg": "^1.0.0",
+    "egg": "^2.0.0",
+    "egg-bin": "^4.3.0",
+    "egg-ci": "^1.8.0",
+    "egg-mock": "^3.13.0",
+    "eslint": "^4.11.0",
+    "eslint-config-egg": "^5.1.0",
+    "webstorm-disable-index": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "scripts": {
+    "start": "NODE_ENV=production egg-scripts start --port=7001 --daemon --title=egg-server-prod --env=prod",
+    "stop": "egg-scripts stop",
+    "dev": "egg-bin dev",
+    "debug": "egg-bin debug",
+    "sit": "egg-scripts start --port=7001 --daemon --title=egg-server-sit --env=test",
+    "uat": "NODE_ENV=production egg-scripts start --port=7001 --daemon --title=egg-server-preview --env=uat",
+    "test": "npm run lint -- --fix && npm run test-local",
+    "test-local": "egg-bin test",
+    "cov": "egg-bin cov",
+    "lint": "eslint .",
+    "ci": "npm run lint && npm run cov",
+    "autod": "autod"
+  },
+  "files": [
+    "app.js",
+    "agent.js",
+    "config",
+    "desc",
+    "test",
+    "app"
+  ],
+  "ci": {
+    "version": "8, 9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eggjs/egg-passport-jyb.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eggjs/egg/issues"
+  },
+  "homepage": "https://github.com/eggjs/egg-passport-jyb#readme",
+  "author": "mocept",
+  "license": "MIT"
+}
