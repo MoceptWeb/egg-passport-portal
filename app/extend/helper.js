@@ -65,7 +65,7 @@ module.exports = {
     }
   },
 
-  isAllowUrl(rules, path) {
+  passportIsAllowUrl(rules, path) {
     return rules.find(rule => {
       if(rule.test(path)) {
         return true;
