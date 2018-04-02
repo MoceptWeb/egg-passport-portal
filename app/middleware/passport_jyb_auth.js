@@ -39,7 +39,7 @@ module.exports = (options, app) => {
         // 正常的api
         await next();
       }
-    } else if((getTicketState === 0 && requestPath === postlogin) || ctx.helper.isAllowUrl(noAuth, requestPath)) {
+    } else if((getTicketState === 0 && requestPath === postlogin) || ctx.helper.passportIsAllowUrl(noAuth, requestPath)) {
       // 只有登录api不需要session 或配置项
       ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb,{getTicketState: null})
       await next();
