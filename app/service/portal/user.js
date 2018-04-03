@@ -72,11 +72,12 @@ class UserService extends Service {
   }
 
   async addUser(portalUser) {
-    const {default_pwd} = this.app.config['passportJyb']['user']
+    const {default_pwd} = this.app.config['passportJyb']['user'];
+    const pwd = sha1(default_pwd);
     const {name, user_name, phone, email, user_id } = portalUser
     const sql = "INSERT INTO t_user(user_name, user_account, tel, mail, user_pwd, user_center_id) VALUES (?, ?, ?, ?, ?, ?)";
     // const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [name, user_name, email, sha1(default_pwd)]);    
-    const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [name, user_name, phone, email, default_pwd, user_id]);
+    const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [name, user_name, phone, email, pwd, user_id]);
     if(queryResult && queryResult.affectedRows == 1) {
       return {
         user_name: name,
