@@ -50,7 +50,8 @@ module.exports = {
           userAccount: dbUserResult.user_account,
           userName: dbUserResult.user_name,
           userId: dbUserResult.user_id,
-          email: dbUserResult.mail
+          email: dbUserResult.mail,
+          tel: dbUserResult.tel
         }
       })
   

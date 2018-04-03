@@ -73,16 +73,17 @@ class UserService extends Service {
 
   async addUser(portalUser) {
     const {default_pwd} = this.app.config['passportJyb']['user']
-    const {name, user_name, email, user_id } = portalUser
-    const sql = "INSERT INTO t_user(user_name, user_account, mail, user_pwd, user_center_id) VALUES (?, ?, ?, ?, ?)";
+    const {name, user_name, phone, email, user_id } = portalUser
+    const sql = "INSERT INTO t_user(user_name, user_account, tel, mail, user_pwd, user_center_id) VALUES (?, ?, ?, ?, ?, ?)";
     // const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [name, user_name, email, sha1(default_pwd)]);    
-    const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [name, user_name, email, default_pwd, user_id]);
+    const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [name, user_name, phone, email, default_pwd, user_id]);
     if(queryResult && queryResult.affectedRows == 1) {
       return {
         user_name: name,
         user_id: queryResult.insertId,
         user_account: user_name,
-        mail: mail
+        mail: mail,
+        tel: phone
       }
     } else {
       return false;
@@ -92,7 +93,7 @@ class UserService extends Service {
   // 通过邮箱更新
   async updateUserByEmail(dbUser, portalUser) {
     // update usercenter id  by  mail
-    const {user_id: portalUserId, name, email, user_name } = portalUser;
+    const {user_id: portalUserId, name, phone, email, user_name } = portalUser;
     const {user_id: userId} = dbUser;
     const sql = "UPDATE  t_user SET user_center_id = ? WHERE user_id = ?";
     const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [portalUserId, userId]);
@@ -101,7 +102,8 @@ class UserService extends Service {
         user_name: name,
         user_id: userId,
         user_account: user_name,
-        mail: mail
+        mail: mail,
+        tel: phone
       }
     } else {
       return false;
