@@ -95,8 +95,14 @@ class UserService extends Service {
     // update usercenter id  by  mail
     const {user_id: portalUserId, name, phone, email, user_name } = portalUser;
     const {user_id: userId} = dbUser;
-    const sql = "UPDATE  t_user SET user_center_id = ? WHERE user_id = ?";
-    const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [portalUserId, userId]);
+    
+    let sql = "UPDATE  t_user SET user_center_id = ? WHERE user_id = ?";
+    let data = [portalUserId, userId]
+    if(phone) {
+      sql = "UPDATE  t_user SET user_center_id = ?, tel = ? WHERE user_id = ?";
+      data = [portalUserId, phone, userId]
+    }
+    const queryResult = await this.ctx.helper.passportMysqlQuery(sql, data);
     if(queryResult && queryResult.affectedRows == 1) {
       return {
         user_name: name,
