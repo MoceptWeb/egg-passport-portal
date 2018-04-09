@@ -1,6 +1,6 @@
 {
   "name": "@node/egg-passport-jyb",
-  "version": "0.0.12",
+  "version": "0.0.15",
   "description": "egg, egg-plugin, passport",
   "eggPlugin": {
     "name": "passportJyb"
