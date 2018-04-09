@@ -21,7 +21,7 @@ exports.passportJyb = {
     'selfSystem': {  
         'notify_uri': '/login',   // 在通过getTicket方法中，自身系统检生成Ticket之后的通知（回调）地址 或者未登录的回跳地址
         'redirect_uri': '/',    //在通过getTicket方法中，透传返回的url参数中的redirect_uri
-        'getLogin': '/login',    // 系统登录url, *** 这里必须在用户中心中同步配置子系统登录url ***
+        'getLogin': '/login',    // 系统登录url, *** 这里必须在用户中心中同步配置子系统登录url ***， 不然默认都抛到用户中心登录界面
         'postlogin' : '/login/doLogin',  // 本系统登出地址
         'getLoginOut': '/login/loginOut',  // 本系统登出地址
         'noAuth': [] // 无需auth验证的api

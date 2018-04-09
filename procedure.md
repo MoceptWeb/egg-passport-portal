@@ -58,28 +58,31 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
 
 # vue
 
-- 路由拆分
-为路由数据和引入两个文件
-- 菜单格式化
- walkroute
+- 路由拆分（建议， 可不用做）
+分为为路由数据和引入两个文件
+
 - 登录
-  - 使用 md5
+  - 使用 md5 加密密码登录
   - 登录成功之后调到 /
 
 - node
 
   - 引入 @node/passportjyb插件
     - 用户中心
-      相关人员的在“运营系统”这个领域
+      在用户中心不通环境添加对应的client_id， 并将对应信息填写在config
 
     - 运营管理对应配置
      数据库， 以及系统sys_code
      
      ```javascript
-    'userDBClient': null,     //  运营中心的user数据库所对应数据库连接, 不配置则默认连接的那个就是
-    'menu_code': null,       // 运营中心所配置的系统的 sys_code 
-    'client_id': null,        // 用户中心对应的系统的的sys_code 
-    'secret_key': null,       //  用户中心对应的系统的secret_key
+    config.passportJyb = {
+    'userDBClient': 'dbMain',  //  运营中心的user数据库所对应数据库连接, 不配置则默认连接的那个就是
+    'menu_code': 'lego_manage',  // 运营中心所配置的系统的 sys_code
+    'client_id': 'lego_manage',         // 用户中心对应的系统的的sys_code 
+    'secret_key': 'aa12b55645fb110f403efbf6bff23186',       //  用户中心对应的系统的secret_key
+    'selfSystem': {  
+      'noAuth': [/^\/lego\/syncCallback/]
+    }
      ```
 
   - 登录更改
@@ -94,9 +97,9 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
   - 菜单获取和基本信息的返回给vue前端
   home.js
   ```javascript
-      const operateUser = this.ctx.session.passportJyb.operateUser;
+    const operateUser = this.ctx.session.passportJyb.operateUser;
 
-    const menu = (await this.ctx.passportGetMenu(operateUser.userId)) || []; 
+    const menu = await this.ctx.passportGetMenu(); 
     
     const userInfo = {
       userid: operateUser.userId,
