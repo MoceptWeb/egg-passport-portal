@@ -1,7 +1,8 @@
 # egg-passport-jyb
 
-通用的和用户中心交互， 以及获取在运用中心的配置的用户菜单权限
+如果需要使用该npm接入用户中心，请直接看下方 ```接入流程```
 
+通用的和用户中心交互， 以及获取在运用中心的配置的用户菜单权限
 - 用户中心
   - 用户中心登录
     登录完后重定向到用户中心同步登录
@@ -9,7 +10,7 @@
     新用户登录： 如果直接通过user_center_id 找不到， 则再次用email验证， 如果email都找不到对应的人， 则在用户中心中查找这个用户的信息，并在运营中心中增加这个user
     
 - 运营中心菜单获取
-前端使用 @jyb/common-menu 进行配合使用
+
 
 
 ## 准备工作
@@ -103,7 +104,7 @@ INSERT INTO `db_jyb_test`.`t_sys_menu`(`menu_id`, `p_menu_id`, `menu_code`, `men
 
 - 代码修改部分
 
-  - 前端需要更改md5方式登录， 以及使用 @jyb/common-menu 包格式化菜单展示， 以及路由文件的显示
+  - 前端需要更改md5方式登录
   
   - egg部分配置config和plugin， 注意各个config的意思
 
@@ -230,7 +231,7 @@ see [config/config.default.js](config/config.default.js) for more detail.
 
 - menu
 ```javascript
-    const menu = （await this.ctx.passportGetMenuData(this.ctx.session.userId)） || [];
+    const menu = await this.ctx.passportGetMenuData(;
 
     await this.ctx.render('layout/layout', {
       keywords: '加油宝,小贷,管理系统',
@@ -281,7 +282,124 @@ npm中 处理
 ```
 
 
+# 接入流程
+以lego为例
+## 数据类
+- 脚本portShell 同步（提前已经做好）
+oa数据、用户中心、运营数据的同步
 
+- 菜单的新增（可以使用sql新增， 也可以自行在运行系统中新增）
+DELETE FROM `db_jyb_test`.`t_sys_menu` WHERE sys_code='lego_manage';
+
+```SQL
+ /* 一级菜单*/
+INSERT INTO `db_jyb_test`.`t_sys_menu`( `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (NULL, 'act', '#', '活动配置管理', '1', '1', 0, 'lego_manage', 'iconfont icon-lihe');
+INSERT INTO `db_jyb_test`.`t_sys_menu`( `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (NULL, 'legoFE', '#', '页面配置管理', '1', '1', 1, 'lego_manage', 'iconfont icon-lihe');
+INSERT INTO `db_jyb_test`.`t_sys_menu`( `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (NULL, 'template', '#', '组件模板管理', '1', '1', 2, 'lego_manage', 'iconfont icon-guanzhu');
+INSERT INTO `db_jyb_test`.`t_sys_menu`( `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (NULL, 'entry', '#', '活动入口配置', '1', '1', 3, 'lego_manage', 'iconfont icon-ziyouhuodong');
+
+/* 二级菜单 */
+/* 活动配置管理 /act act  : 活动列表 /act/list  actList  新增活动  /act/edit newAct 命令字列表 /act/cmdList cmdList 规则/动作列表 /act/paramsList  filterList
+*/  
+
+INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'actList', '/act/list', '活动列表', '2', '1', 1, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='act' AND sys_code='lego_manage';
+INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'newAct', '/act/edit', '新增活动', '2', '1', 2, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='act' AND sys_code='lego_manage';
+INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'cmdList', '/act/cmdList', '命令字列表', '2', '1', 3, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='act' AND sys_code='lego_manage';
+INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'filterList', '/act/paramsList', '规则/动作列表', '2', '1', 4, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='act' AND sys_code='lego_manage';
+/* 组件模板管理 /template template : 规则树模板列表 /template/templateList  templateList */ 
+
+INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'templateList', '/template/templateList', '规则树模板列表', '2', '1', 1, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='template' AND sys_code='lego_manage';
+/* 页面配置管理 /lego  legoFE  : 乐高页面列表  /lego/pageList  pageList   乐高组件集合  /lego/componentList componentList */ 
+INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'pageList', '/lego/pageList', '乐高页面列表', '2', '1', 1, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='legoFE' AND sys_code='lego_manage';
+INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'componentList', '/lego/componentList', '乐高组件集合', '2', '1', 1, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='legoFE' AND sys_code='lego_manage';
+/* 系统设置  /system system  : 同步配置  /system/sync  systemSync */ 
+
+/*活动入口配置  /entry entry : 入口配置 /entry/list entryList 入口活动列表 /entry/entryActList entryActList */
+INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'entryList', '/entry/list', '入口配置', '2', '1', 1, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='entry' AND sys_code='lego_manage';
+INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'entryActList', '/entry/entryActList', '入口活动列表', '2', '1', 2, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='entry' AND sys_code='lego_manage';
+
+
+/* 权限*/
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('lego_manage', '乐高管理系统', '1');
+
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('act', '活动配置管理', '1');
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('legoFE', '页面配置管理', '1');
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('template', '组件模板管理', '1');
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('entry', '活动入口配置', '1');
+
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('actList', '活动列表', '2');
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('newAct', '新增活动', '2');
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('cmdList', '命令字列表', '2');
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('filterList', '规则/动作列表', '2');
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('templateList', '规则树模板列表', '2');
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('pageList', '乐高页面列表', '2');
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('componentList', '乐高组件集合', '2');
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('entryList', '入口配置', '2');
+INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('entryActList', '入口活动列表', '2');
+
+```
+
+- 用户中心对应client_id和secret_key的生成
+请在用户中心对应环境新增自己的系统， 并在passport的config中对应配置
+  - 如果不配置登录url则全部登录在用户中心， 所以如果要使用自身的登录页面请配置这个入口
+
+## 代码类
+### vue
+
+- 登录
+  - 使用 md5 加密密码登录
+  - 登录成功之后调到 /
+
+### node
+
+  - 引入 @node/passportjyb插件
+    - 用户中心
+      在用户中心不通环境添加对应的client_id， 并将对应信息填写在config
+
+    - 运营管理对应配置
+     数据库， 以及系统sys_code
+     
+     ```javascript
+    config.passportJyb = {
+    'userDBClient': 'dbMain',  //  运营中心的user数据库所对应数据库连接, 不配置则默认连接的那个就是
+    'menu_code': 'lego_manage',  // 运营中心所配置的系统的 sys_code
+    'client_id': 'lego_manage',         // 用户中心对应的系统的的sys_code 
+    'secret_key': 'aa12b55645fb110f403efbf6bff23186',       //  用户中心对应的系统的secret_key
+    'selfSystem': {  
+      'noAuth': [/^\/lego\/syncCallback/]
+    }
+     ```
+
+  - 登录更改
+   controller/login
+  ```javascript
+      const match = await this.ctx.passportLogin({
+      username: user,
+      password: pwd
+    })
+  ```
+
+  - 菜单获取和基本信息的返回给vue前端
+  home.js
+  ```javascript
+    const operateUser = this.ctx.session.passportJyb.operateUser;
+
+    const menu = await this.ctx.passportGetMenu(); 
+    
+    const userInfo = {
+      userid: operateUser.userId,
+      userName: operateUser.userName,
+      userAccount: operateUser.userAccount,
+      email: operateUser.email
+    };
+    await this.ctx.render('layout/layout', {
+      keywords: '加油宝,小贷,管理系统',
+      description: '加油宝小贷管理系统',
+      title: '小贷管理系统',
+      menuList: JSON.stringify(menu),
+      userInfo: JSON.stringify(userInfo)
+    });
+  ```
 
 ## todo
 

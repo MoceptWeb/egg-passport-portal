@@ -1,8 +1,9 @@
 以lego为例
 # 数据类
-- 脚本portShell 同步
+- 脚本portShell 同步（提前已经做好）
+oa数据、用户中心、运营数据的同步
 
-- 菜单的新增
+- 菜单的新增（可以使用sql新增， 也可以自行在运行系统中新增）
 DELETE FROM `db_jyb_test`.`t_sys_menu` WHERE sys_code='lego_manage';
 ```SQL
  /* 一级菜单*/
@@ -56,16 +57,15 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
 
 ```
 
-# vue
+# 代码类
+## vue
 
-- 路由拆分（建议， 可不用做）
-分为为路由数据和引入两个文件
 
 - 登录
   - 使用 md5 加密密码登录
   - 登录成功之后调到 /
 
-- node
+## node
 
   - 引入 @node/passportjyb插件
     - 用户中心
@@ -86,7 +86,7 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
      ```
 
   - 登录更改
- 
+   controller/login
   ```javascript
       const match = await this.ctx.passportLogin({
       username: user,
