@@ -137,7 +137,18 @@ exports.passportJyb = {
  */
 
 exports.passportJyb = {
-    'userDBClient': null,     //  运营中心的user数据库所对应数据库连接, 不配置则默认连接的那个就是
+    clients: {
+        mysqlOperate: {
+             app: false,   // 是否使用passport插件的mysql连接 来连接运营中心数据库
+            'userDBClient': null,     // 如果原系统已经使用连接了运营中心的数据库， 且只有一个连接， 则不配置； 有多个连接则指定db； 且只有在app = true 生效
+            type: 'mysqlOperate',
+            default: {
+                database: null,
+                connectionLimit: 5,
+            },
+            agent: false,
+        }
+    },
     'menu_code': null,       // 运营中心所配置的系统的 sys_code 
     'client_id': null,        // 用户中心对应的系统的的sys_code 
     'secret_key': null,       //  用户中心对应的系统的secret_key
@@ -361,7 +372,18 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
      
      ```javascript
     config.passportJyb = {
-    'userDBClient': 'dbMain',  //  运营中心的user数据库所对应数据库连接, 不配置则默认连接的那个就是
+       clients: {
+        mysqlOperate: {
+             app: false,   // 是否使用passport插件的mysql连接 来连接运营中心数据库
+            'userDBClient': null,     // 如果原系统已经使用连接了运营中心的数据库， 且只有一个连接， 则不配置； 有多个连接则指定db； 且只有在app = true 生效
+            type: 'mysqlOperate',
+            default: {
+                database: null,
+                connectionLimit: 5,
+            },
+            agent: false,
+        }
+    },
     'menu_code': 'lego_manage',  // 运营中心所配置的系统的 sys_code
     'client_id': 'lego_manage',         // 用户中心对应的系统的的sys_code 
     'secret_key': 'aa12b55645fb110f403efbf6bff23186',       //  用户中心对应的系统的secret_key
@@ -369,6 +391,8 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
       'noAuth': [/^\/lego\/syncCallback/]
     }
      ```
+    - 关于数据库配置项
+    isUseDefaultMySql
 
   - 登录更改
    controller/login
@@ -377,6 +401,26 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
       username: user,
       password: pwd
     })
+
+    if(match) {
+      const operateUser = match.operateUser;
+      try {
+        const roleList = await this.service.login.loginService.findRole(operateUser.userId);
+        if(roleList) {
+          // 刷新csrftoken的值
+          this.ctx.rotateCsrfSecret();
+          // 写session， 兼容老版本中用的session; 如果修改不多， 尽量把所有的session改成使用passport中已经有的数据， 不用多余增加
+          this.ctx.session.userid = operateUser.userId;
+          this.ctx.session.userName = operateUser.userName;
+          this.ctx.session.userAccount = operateUser.userAccount;
+          this.ctx.session.userEmail = operateUser.email;
+          this.ctx.logger.info('用户信息：'+ JSON.stringify(match));
+          this.ctx.session.roles = roleList.map(role => {
+            return role.role_id;
+          });
+          // 登录成功
+          this.ctx.body = errCode.LOGIN_SUCCESS;
+        }
   ```
 
   - 菜单获取和基本信息的返回给vue前端

@@ -33,10 +33,13 @@ module.exports = {
   },
 
   async passportMysqlConnect() {
-    const portalConfig= this.app.config['passportJyb']
+    const portalConfig = this.app.config['passportJyb']
+    if(portalConfig.clients.mysqlOperate.app) {
+      return this.app.passportJyb.get(portalConfig.clients.mysqlOperate.type);
+    }
     let mysqlConnect = null;
     if(portalConfig.userDBClient) {
-      mysqlConnect = this.app.mysql.get(portalConfig.userDBClient)
+      mysqlConnect = this.app.mysql.get(portalConfig.clients.mysqlOperate.userDBClient)
     } else {
       mysqlConnect = this.app.mysql
     } 

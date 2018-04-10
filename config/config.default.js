@@ -14,7 +14,18 @@
  */
 
 exports.passportJyb = {
-    'userDBClient': null,     //  运营中心的user数据库所对应数据库连接, 不配置则默认连接的那个就是
+    clients: {
+        mysqlOperate: {
+            type: 'mysqlOperate',
+            'userDBClient': null,     // 如果isUseDefaultMySql = false 运营中心的user数据库所对应数据库连接, 不配置则默认连接的那个就是   
+            default: {
+                database: null,
+                connectionLimit: 5,
+            },
+            app: false,   // 是否使用插件的mysql连接 来连接运营中心数据库
+            agent: false
+        }
+    },
     'menu_code': null,       // 运营中心所配置的系统的 sys_code 
     'client_id': null,        // 用户中心对应的系统的的sys_code 
     'secret_key': null,       //  用户中心对应的系统的secret_key

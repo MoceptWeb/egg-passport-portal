@@ -7,6 +7,15 @@
  */
 
 exports.passportJyb = {
+    clients: {
+        mysqlOperate: {
+            host: '10.4.33.63',
+            port: 3306,
+            user: 'jybsit',
+            password: 'SITYHNBGT',
+            database: "db_jyb"
+        }
+    },
     'client_id': 'operate_system',
     'secret_key': 'aa12b55645fb110f403efbf6bff23186',
     'portal': {

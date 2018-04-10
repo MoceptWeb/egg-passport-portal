@@ -1,5 +1,9 @@
 
+const mysql = require('./lib/mysql');
+
 module.exports = app => {
+
+  if (app.config.passportJyb.clients.mysqlOperate.app) mysql(app);
   // 将 static 中间件放到 bodyParser 之前
   const index = app.config.coreMiddleware.length;
   // const index = app.config.coreMiddleware.indexOf('bodyParser');

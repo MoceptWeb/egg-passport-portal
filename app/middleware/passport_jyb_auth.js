@@ -24,7 +24,7 @@ module.exports = (options, app) => {
     const portalConfig= ctx.app.config['passportJyb']['selfSystem']
     const {redirect_uri, notify_uri, getLogin, postlogin, getLoginOut, noAuth} = portalConfig;
     const {url: requestUrl, path: requestPath, origin: originUrl} = ctx.request;
-    if((user_id && user_name)) {
+  if((user_id && user_name)) {
       if(/^\/[^?#]/.test(requestPath) === false && setLoginState !== 1) {
         // 根路由，同步登陆
         const setLoginStateUrl = await ctx.service.portal.portal.setLoginState(ticket.ticket, originUrl)
@@ -56,10 +56,17 @@ module.exports = (options, app) => {
           ctx.redirect(notify_uri)
         }
       } else if(code === '-2' && getTicketState === 1) {
+
+        // 防止用户中心配置错误url
+        const testLogin = portalConfig.notify_uri.replace(/(\^|\(|\)|\[|\]|\$|\*|\+|\.|\?|\\|\{|\}|\|)/g, '\\$1');
+        if(!new RegExp(testLogin, 'i').test(requestUrl)) {
+          ctx.redirect(notify_uri + '?code=-2')
+        } else {
         // 去getTicket校验过的真code === -2  才能不去getTicket
         // 这里是notify_uri: login的get地址
         ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
-        await next();
+          await next();
+        }
       } else {
         // 无ticket直接去用户中心验证
         const ticketUrl = await ctx.service.portal.portal.getTicket({redirect_uri: originUrl + redirect_uri, notify_uri: originUrl + notify_uri})

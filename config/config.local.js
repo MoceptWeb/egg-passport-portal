@@ -7,6 +7,16 @@
  */
 
 exports.passportJyb = {
+    // 用于单例生成
+    clients: {
+        mysqlOperate: {
+            host: '172.16.1.13',
+            port: 3306,
+            user: 'jiayoubao',
+            password: 'root1234',
+            database: "db_jyb_test"
+        }
+    },
     'client_id': 'operate_system',
     'secret_key': '4464fb906f4d7bc29cada6c510d0e2be',
     'portal': {
