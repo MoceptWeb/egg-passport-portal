@@ -38,7 +38,7 @@ module.exports = {
       return this.app.passportJyb.get(portalConfig.clients.mysqlOperate.type);
     }
     let mysqlConnect = null;
-    if(portalConfig.userDBClient) {
+    if(portalConfig.clients.mysqlOperate.userDBClient) {
       mysqlConnect = this.app.mysql.get(portalConfig.clients.mysqlOperate.userDBClient)
     } else {
       mysqlConnect = this.app.mysql

@@ -1,6 +1,6 @@
 # egg-passport-jyb
 
-如果需要使用该npm接入用户中心，请直接看下方 ```接入流程```
+## 如果需要使用该npm接入用户中心，请直接看下方 ```接入流程``` 步骤
 
 通用的和用户中心交互， 以及获取在运用中心的配置的用户菜单权限
 - 用户中心
@@ -376,12 +376,6 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
         mysqlOperate: {
              app: false,   // 是否使用passport插件的mysql连接 来连接运营中心数据库
             'userDBClient': null,     // 如果原系统已经使用连接了运营中心的数据库， 且只有一个连接， 则不配置； 有多个连接则指定db； 且只有在app = true 生效
-            type: 'mysqlOperate',
-            default: {
-                database: null,
-                connectionLimit: 5,
-            },
-            agent: false,
         }
     },
     'menu_code': 'lego_manage',  // 运营中心所配置的系统的 sys_code
@@ -391,8 +385,19 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
       'noAuth': [/^\/lego\/syncCallback/]
     }
      ```
-    - 关于数据库配置项
-    isUseDefaultMySql
+    - 关于数据库配置强调说明
+    如果使用方没有连接运营中心数据， 则 
+
+    clients: {
+        mysqlOperate: {
+             app: true
+        }
+
+    如果使用方没有连接运营中心数据， 则 需要看时候是哪个userDBClient 是连接的db， 如果只有一个唯一的数据库连接， 则无需配置任何数据库选项
+    clients: {
+        mysqlOperate: {
+            'userDBClient': null,     // 如果原系统已经使用连接了运营中心的数据库， 且只有一个连接， 则不配置； 有多个连接则指定db； 且只有在app = true 生效
+        }
 
   - 登录更改
    controller/login
