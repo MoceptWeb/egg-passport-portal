@@ -21,10 +21,11 @@ module.exports = (options, app) => {
     const passportJyb = ctx.session && ctx.session.passportJyb || {};
     const {user_id, user_name, ticket, setLoginState, getTicketState}  = passportJyb;
 
-    const portalConfig= ctx.app.config['passportJyb']['selfSystem']
-    const {redirect_uri, notify_uri, getLogin, postlogin, getLoginOut, noAuth, loginOut_redirect_uri} = portalConfig;
+    const portalConfig= ctx.app.config['passportJyb']['selfSystem'];
+
+    const {redirect_uri, notify_uri, getLoginOut, noAuth, loginOut_redirect_uri} = portalConfig;
     const {url: requestUrl, path: requestPath, origin: originUrl} = ctx.request;
-  
+
     if((user_id && user_name)) {
       if(/^\/[^?#]/.test(requestPath) === false && setLoginState !== 1) {
         // 根路由，同步登陆

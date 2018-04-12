@@ -34,6 +34,7 @@ exports.passportJyb = {
         'redirect_uri': '/',    //在通过getTicket方法中，透传返回的url参数中的redirect_uri
         'loginOut_redirect_uri': '/',    //同步登出后的重定向地址redirect_uri
         'getLoginOut': '/login/loginOut',  // 本系统登出地址
+        'loginIn_redirect_uri': '/',    //同步登录后的重定向地址redirect_uri
         'noAuth': [/\/login\/doLogin/] // 无需auth验证的api， 默认加入post登录
         // 'getLogin': '/login',    // 系统登录url, *** 这里必须在用户中心中同步配置子系统登录url ***， 不然默认都抛到用户中心登录界面, 这里和用户中心配置一样
         // 'postlogin' : '/login/doLogin',  // 本系统登录地址
