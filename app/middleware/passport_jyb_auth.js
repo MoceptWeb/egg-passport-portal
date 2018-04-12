@@ -22,9 +22,10 @@ module.exports = (options, app) => {
     const {user_id, user_name, ticket, setLoginState, getTicketState}  = passportJyb;
 
     const portalConfig= ctx.app.config['passportJyb']['selfSystem']
-    const {redirect_uri, notify_uri, getLogin, postlogin, getLoginOut, noAuth} = portalConfig;
+    const {redirect_uri, notify_uri, getLogin, postlogin, getLoginOut, noAuth, loginOut_redirect_uri} = portalConfig;
     const {url: requestUrl, path: requestPath, origin: originUrl} = ctx.request;
-  if((user_id && user_name)) {
+  
+    if((user_id && user_name)) {
       if(/^\/[^?#]/.test(requestPath) === false && setLoginState !== 1) {
         // 根路由，同步登陆
         const setLoginStateUrl = await ctx.service.portal.portal.setLoginState(ticket.ticket, originUrl)
@@ -32,14 +33,14 @@ module.exports = (options, app) => {
         ctx.redirect(setLoginStateUrl)
       } else if (requestPath === getLoginOut)  {
         // 同步登出
-        const setLogOutStateUrl = await ctx.service.portal.portal.setLogOutState(originUrl + redirect_uri);
+        const setLogOutStateUrl = await ctx.service.portal.portal.setLogOutState(originUrl + loginOut_redirect_uri);
         ctx.session = null;
         ctx.redirect(setLogOutStateUrl);
       } else {
         // 正常的api
         await next();
       }
-    } else if((getTicketState === 0 && requestPath === postlogin) || ctx.helper.passportIsAllowUrl(noAuth, requestPath)) {
+    } else if(ctx.helper.passportIsAllowUrl(noAuth, requestPath)) {
       // 只有登录api不需要session 或配置项
       ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb,{getTicketState: null})
       await next();
@@ -56,17 +57,19 @@ module.exports = (options, app) => {
           ctx.redirect(notify_uri)
         }
       } else if(code === '-2' && getTicketState === 1) {
-
-        // 防止用户中心配置错误url
+        
+        ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
+        await next();
+/*         // 防止用户中心配置错误url
         const testLogin = portalConfig.notify_uri.replace(/(\^|\(|\)|\[|\]|\$|\*|\+|\.|\?|\\|\{|\}|\|)/g, '\\$1');
         if(!new RegExp(testLogin, 'i').test(requestUrl)) {
-          ctx.redirect(notify_uri + '?code=-2')
+          ctx.redirect(getLogin + '?code=-2')
         } else {
         // 去getTicket校验过的真code === -2  才能不去getTicket
         // 这里是notify_uri: login的get地址
         ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
           await next();
-        }
+        } */
       } else {
         // 无ticket直接去用户中心验证
         const ticketUrl = await ctx.service.portal.portal.getTicket({redirect_uri: originUrl + redirect_uri, notify_uri: originUrl + notify_uri})
@@ -76,22 +79,6 @@ module.exports = (options, app) => {
       
     }
 
-
-
-
-
-    /* if (/^\/login/.test(requestUrl)) {
-      await next();
-    } else {
-      if(!userId || !userName) {
-        
-        // ctx.redirect(url);
-        ctx.redirect('/login');
-      } else {
-        await next();
-      }
-    }
- */
 
   }
 }

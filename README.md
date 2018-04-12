@@ -399,6 +399,19 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
             'userDBClient': null,     // 如果原系统已经使用连接了运营中心的数据库， 且只有一个连接， 则不配置； 有多个连接则指定db； 且只有在app = true 生效
         }
 
+   - 关于用户中心配置子系统登录url问题, 以及自身系统和登录相关的url配置
+     - 如果用户中心配置子系统url， 则跳转用户中心登录
+     - 否则
+     ```
+     'selfSystem': {  
+        'notify_uri': '/login',   // 在通过getTicket方法中，自身系统检生成Ticket之后的通知（回调）地址 ， 没有登录则是跳转到用户中心配置的login或用户中心登录页面
+        'redirect_uri': '/',    //在通过getTicket方法中，透传返回的url参数中的redirect_uri
+        'loginOut_redirect_uri': '/',    //同步登出后的重定向地址redirect_uri
+        'getLoginOut': '/login/loginOut',  // 本系统登出地址
+        'noAuth': [/\/login\/doLogin/] // 无需auth验证的api， 默认加入post登录
+    },
+    ```
+
   - 登录更改
    controller/login
   ```javascript

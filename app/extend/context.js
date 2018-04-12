@@ -17,6 +17,7 @@ module.exports = {
     if(!verifyTicket) {
       return false;
     }
+    verifyTicket.ticket = ticket;
     const dbUser = await this.passportGetUserByIdentifier(verifyTicket, options)
     return dbUser;
   },
