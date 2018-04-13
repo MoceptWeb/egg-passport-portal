@@ -34,7 +34,7 @@
     "stop": "egg-scripts stop --title=egg-server-egg-schedule",
     "dev": "egg-bin dev",
     "debug": "egg-bin debug",
-    "sit": "egg-scripts start --port=7001 --daemon --title=egg-server-egg-schedule --env=test",
+    "sit": "egg-scripts start --port=7001 --daemon --title=egg-server-egg-schedule --env=sit",
     "uat": "NODE_ENV=production egg-scripts start --port=7001 --daemon --title=egg-server-egg-schedule --env=uat",
     "test": " npm run test-local",
     "test-local": "egg-bin test",
