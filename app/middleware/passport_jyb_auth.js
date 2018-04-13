@@ -21,20 +21,24 @@ module.exports = (options, app) => {
     const passportJyb = ctx.session && ctx.session.passportJyb || {};
     const {user_id, user_name, ticket, setLoginState, getTicketState}  = passportJyb;
 
-    const portalConfig= ctx.app.config['passportJyb']['selfSystem'];
-
-    const {redirect_uri, notify_uri, getLoginOut, noAuth, loginOut_redirect_uri} = portalConfig;
     const {url: requestUrl, path: requestPath, origin: originUrl} = ctx.request;
-
+    const portalConfig= ctx.app.config['passportJyb']['selfSystem']
+    Object.keys(portalConfig).forEach(key => {
+      if(['redirect_uri', 'notify_uri', 'loginOut_redirect_uri', 'loginIn_redirect_uri'].indexOf(key) !== -1 && !/^http/.test(portalConfig[key])) {
+        portalConfig[key] = originUrl +  portalConfig[key]
+      }
+    });
+    const {redirect_uri, notify_uri, loginOut_redirect_uri, loginIn_redirect_uri,  getLoginOut, noAuth } = portalConfig;
+  
     if((user_id && user_name)) {
       if(/^\/[^?#]/.test(requestPath) === false && setLoginState !== 1) {
         // 根路由，同步登陆
-        const setLoginStateUrl = await ctx.service.portal.portal.setLoginState(ticket.ticket, originUrl)
+        const setLoginStateUrl = await ctx.service.portal.portal.setLoginState(ticket.ticket, loginIn_redirect_uri)
         ctx.session.passportJyb.setLoginState = 1;
         ctx.redirect(setLoginStateUrl)
       } else if (requestPath === getLoginOut)  {
         // 同步登出
-        const setLogOutStateUrl = await ctx.service.portal.portal.setLogOutState(originUrl + loginOut_redirect_uri);
+        const setLogOutStateUrl = await ctx.service.portal.portal.setLogOutState(loginOut_redirect_uri);
         ctx.session = null;
         ctx.redirect(setLogOutStateUrl);
       } else {
@@ -57,7 +61,7 @@ module.exports = (options, app) => {
         } else {
           ctx.redirect(notify_uri)
         }
-      } else if(code === '-2' && getTicketState === 1) {
+      } else if((code === '-2' ||  code === '-1') && getTicketState === 1) {
         
         ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
         await next();
@@ -73,7 +77,7 @@ module.exports = (options, app) => {
         } */
       } else {
         // 无ticket直接去用户中心验证
-        const ticketUrl = await ctx.service.portal.portal.getTicket({redirect_uri: originUrl + redirect_uri, notify_uri: originUrl + notify_uri})
+        const ticketUrl = await ctx.service.portal.portal.getTicket({redirect_uri: redirect_uri, notify_uri: notify_uri})
         ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb,{getTicketState: 1})
         ctx.redirect(ticketUrl);
       }
