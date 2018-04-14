@@ -2,6 +2,8 @@
 
 const Service = require('egg').Service;
 const md5 = require('md5')
+const debugPassportJyb = require('debug')('passportJyb')
+
 /**
  * 1、可以先通过getTicket url获取是否登录， 如果登录则到notify_uri进行token验证后直接登录
  * 2、如果getTicket 没有登录则通过用户名和密码登录，然后同步用户中心setLoginState
@@ -43,6 +45,9 @@ class PortalService extends Service {
 
     const result = await  this.ctx.helper.passportSendNormalRequest(portalConfig['portal']['portal_url'], param)
 
+    debugPassportJyb('校验ticket, 结果是 %s', JSON.stringify(result))
+    this.ctx.logger.info('校验ticket, 结果是 %s', JSON.stringify(result))
+
     if(!result || result.code !== 0) {
       return false;
     }
@@ -74,6 +79,9 @@ class PortalService extends Service {
       }
     
     const result = await  this.ctx.helper.passportSendNormalRequest(portalConfig['portal']['portal_url'], param)
+
+    debugPassportJyb('校验用户中心用户名和密码, 结果是 %s', JSON.stringify(result))
+    
     
     if(!result || result.code !== 0) {
       return false;
@@ -102,6 +110,8 @@ class PortalService extends Service {
       }
 
     const result = await  this.ctx.helper.passportSendNormalRequest(portalConfig['portal']['portal_url'], param)
+    debugPassportJyb('通过用户中心获取用户中心用户信息, 结果是 %s', JSON.stringify(result))
+    
     if(!result || result.code !== 0) {
       return false;
     }

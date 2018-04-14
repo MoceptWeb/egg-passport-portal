@@ -3,6 +3,8 @@
 const Service = require('egg').Service;
 
 const sha1 = require('sha1')
+const debugPassportJyb = require('debug')('passportJyb')
+
 
 class UserService extends Service {
   
@@ -23,6 +25,7 @@ class UserService extends Service {
     const mysqlConnect = await this.ctx.helper.passportMysqlConnect();
     // 假如 我们拿到用户 id 从数据库获取用户详细信息
     const queryResult = await mysqlConnect.get('t_user', {user_center_id: portalUserID});
+    debugPassportJyb('通过用户中心id获取运营用户信息 %s', JSON.stringify(queryResult))
     // const queryResult = await this.app.mysql.get('t_user', {portal_userID: portalUserID});
     return queryResult;
   }
@@ -35,7 +38,8 @@ class UserService extends Service {
     // 只能有一个邮箱匹配上， 不然log
     if(queryResult) {
       if(queryResult.length > 1) {
-        this.ctx.logger.error(JSON.stringify(portalUser) + '根据邮箱匹配有超过两条数据');
+        this.ctx.logger.error(JSON.stringify(portalUser) + '根据邮箱匹配有超过一条数据');
+        debugPassportJyb('根据邮箱匹配有超过一条数据 %s', JSON.stringify(portalUser))
         return false;
       } else {
          return queryResult[0];
@@ -78,12 +82,14 @@ class UserService extends Service {
     const sql = "INSERT INTO t_user(user_name, user_account, tel, mail, user_pwd, user_center_id) VALUES (?, ?, ?, ?, ?, ?)";
     // const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [name, user_name, email, sha1(default_pwd)]);    
     const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [name, user_name, phone, email, pwd, user_id]);
+    debugPassportJyb('新增运营用户 %s, 结果 %s', JSON.stringify(portalUser), JSON.stringify(queryResult))
+    
     if(queryResult && queryResult.affectedRows == 1) {
       return {
         user_name: name,
         user_id: queryResult.insertId,
         user_account: user_name,
-        mail: mail,
+        mail: email,
         tel: phone
       }
     } else {
@@ -104,12 +110,14 @@ class UserService extends Service {
       data = [portalUserId, phone, userId]
     }
     const queryResult = await this.ctx.helper.passportMysqlQuery(sql, data);
+    debugPassportJyb('根据用户中心邮箱匹配更新运营数据 用户中心 %s, 运营中心 %s, 结果 %s', JSON.stringify(portalUser), JSON.stringify(dbUser), JSON.stringify(queryResult))
+    this.ctx.logger.info('根据用户中心邮箱匹配更新运营数据 用户中心 %s, 运营中心 %s, 结果 %s', JSON.stringify(portalUser), JSON.stringify(dbUser), JSON.stringify(queryResult))
     if(queryResult && queryResult.affectedRows == 1) {
       return {
         user_name: name,
         user_id: userId,
         user_account: user_name,
-        mail: mail,
+        mail: email,
         tel: phone
       }
     } else {

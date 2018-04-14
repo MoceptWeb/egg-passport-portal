@@ -1,6 +1,6 @@
 'use strict';
 
-
+const debugPassportJyb = require('debug')('passportJyb')
 
 
 module.exports = {
@@ -26,6 +26,7 @@ module.exports = {
       });
       return result.data;
     } catch(e) {
+      debugPassportJyb(e.message);
       ctx.logger.error(e.message);
       // return false;
       // 重新调用
@@ -44,7 +45,7 @@ module.exports = {
       mysqlConnect = this.app.mysql
     } 
     if(!mysqlConnect) {
-      this.ctx.logger.error('数据库连接数据');
+      this.ctx.logger.error('passport-jyb 数据库连接数据');
     }
     return mysqlConnect;
   },
@@ -62,6 +63,7 @@ module.exports = {
       const queryResult = await mysqlConnect.query(sql, param);
       return queryResult;
     } catch(e) {
+      debugPassportJyb(e.message);
       ctx.logger.error(e.message);
       return false;
       // 重新调用

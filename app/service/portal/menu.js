@@ -1,5 +1,7 @@
 'use strict';
 
+const debugPassportJyb = require('debug')('passportJyb')
+
 const Service = require('egg').Service;
 
 class MenuService extends Service {
@@ -23,6 +25,8 @@ class MenuService extends Service {
     ) and menu_status=1 and sys_code=? and menu_type=1  order by menu_order;`
     // 假如 我们拿到用户 id 从数据库获取用户详细信息
     const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [userId, menu_code, menu_code]);
+    debugPassportJyb('通过运营用户id获取用户中心一级菜单, 结果是 %s', JSON.stringify(queryResult))
+    
     return queryResult;
   }
 
@@ -35,7 +39,7 @@ class MenuService extends Service {
         ) and menu_status=1 and sys_code=? and menu_type=2  order by menu_order;`
     // 假如 我们拿到用户 id 从数据库获取用户详细信息
     const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [userId, menu_code]);
-    console.log(queryResult)
+    debugPassportJyb('通过运营用户id获取用户获取用户中心二级菜单, 结果是 %s', JSON.stringify(queryResult))
     return queryResult;
   }
 

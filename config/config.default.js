@@ -30,13 +30,13 @@ exports.passportJyb = {
     'client_id': null,        // 用户中心对应的系统的的sys_code 
     'secret_key': null,       //  用户中心对应的系统的secret_key
     'selfSystem': {  
-        'notify_uri': '/login',   // 在通过getTicket方法中，自身系统检生成Ticket之后的通知（回调）地址 ， 没有登录则是跳转到用户中心配置的login或用户中心登录页面
+        'notify_uri': '/',   // 在通过getTicket方法中，如果登录则是在用户中心生成Ticket之后的通知（回调）地址 ， 没有登录则是跳转到用户中心配置的login或用户中心登录页面输入用户名密码登录后的回调地址
         'redirect_uri': '/',    //在通过getTicket方法中，透传返回的url参数中的redirect_uri
         'loginOut_redirect_uri': '/',    //同步登出后的重定向地址redirect_uri
         'getLoginOut': '/login/loginOut',  // 本系统登出地址
-        'loginIn_redirect_uri': '/',    //同步登录后的重定向地址redirect_uri
-        'noAuth': [/\/login\/doLogin/] // 无需auth验证的api， 默认加入post登录
-        // 'getLogin': '/login',    // 系统登录url, *** 这里必须在用户中心中同步配置子系统登录url ***， 不然默认都抛到用户中心登录界面, 这里和用户中心配置一样
+        'loginIn_redirect_uri': '/',    // 同步登录后的重定向地址redirect_uri
+        'noAuth': [/\/login\/doLogin/], // 无需auth验证的api， 默认加入post登录， 否则无法进行自身系统的登录post
+        'getLogin': '/login',    // 本身系统页面登录url, 一般和用户中心配置的登录一致
         // 'postlogin' : '/login/doLogin',  // 本系统登录地址
     },
     'cmd': {
