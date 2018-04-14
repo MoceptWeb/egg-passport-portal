@@ -57,7 +57,9 @@ class UserService extends Service {
    */
   async find2add(portalUserId) {
     const portalUser = await this.service.portal.portal.getUserByUseId(portalUserId)
-
+    if(portalUser === false) {
+      return false;
+    }
     let newUser = null;
     if(portalUser.email) {
       const isFindByMail = await this.findByMail(portalUser)
@@ -68,6 +70,7 @@ class UserService extends Service {
         newUser = await this.addUser(portalUser)
       }
     } else {
+      
       // 没有邮箱直接新增
       newUser = await this.addUser(portalUser)
     }
