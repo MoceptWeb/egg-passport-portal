@@ -110,7 +110,7 @@ class PortalService extends Service {
       }
 
     const result = await  this.ctx.helper.passportSendNormalRequest(portalConfig['portal']['portal_url'], param)
-    debugPassportJyb('通过用户中心获取用户中心用户信息, 结果是 %s', JSON.stringify(result))
+    debugPassportJyb('通过用户中心id获取用户中心用户信息, 结果是 %s', JSON.stringify(result))
     
     if(!result || result.code !== 0) {
       return false;
