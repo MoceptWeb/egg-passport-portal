@@ -17,7 +17,7 @@ exports.passportJyb = {
         }
     },
     'client_id': 'operate_system',
-    'secret_key': 'aa12b55645fb110f403efbf6bff23186',
+    'secret_key': '4464fb906f4d7bc29cada6c510d0e2be',
     'portal': {
         "portal_url": "http://u.sit.jyblife.com/out/", //用户中心接口地址
         "portal_get_ticket_url": "http://u.sit.jyblife.com/system/getTicket", //获取ticketurl
