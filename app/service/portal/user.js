@@ -48,6 +48,39 @@ class UserService extends Service {
       return false;
     }
   }
+
+  async findByAccount(portalUser) {
+    const {user_name} = portalUser
+    // 假如 我们拿到用户 id 从数据库获取用户详细信息
+    const sql = "select user_id from t_user where user_account = ?";
+    const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [user_name]);
+    
+    if(queryResult) {
+      return queryResult[0];
+    } else {
+      return false;
+    }
+  }
+
+  async findByName(portalUser) {
+    const {name} = portalUser
+    // 假如 我们拿到用户 id 从数据库获取用户详细信息
+    const sql = "select user_id from t_user where user_name = ?";
+    const queryResult = await this.ctx.helper.passportMysqlQuery(sql, [name]);
+    
+    // 只能有一个邮箱匹配上， 不然log
+    if(queryResult) {
+      if(queryResult.length > 1) {
+        this.ctx.logger.info(JSON.stringify(portalUser) + '根据用户名匹配有超过一条数据');
+        debugPassportJyb('根据用户名匹配有超过一条数据 %s', JSON.stringify(portalUser))
+        return false;
+      } else {
+         return queryResult[0];
+      }
+    } else {
+      return false;
+    }
+  }
   
   /**
    * 1、如果有对应portalUserId  直接登录，没有则获取对应用户信息
@@ -64,16 +97,32 @@ class UserService extends Service {
     if(portalUser.email) {
       const isFindByMail = await this.findByMail(portalUser)
       if(isFindByMail) {
-        newUser = await this.updateUserByEmail(isFindByMail, portalUser)
-      } else {
-        // 邮箱没匹配直接新增
-        newUser = await this.addUser(portalUser)
-      }
-    } else {
-      
-      // 没有邮箱直接新增
-      newUser = await this.addUser(portalUser)
+        newUser = await this.updateUserById(isFindByMail, portalUser)
+      } 
     }
+
+    if(newUser) {
+      return newUser;
+    }
+
+    // 邮箱没匹配, 则匹配account和name， 同时匹配update, 否则新增
+    const findByAccount = await this.findByAccount(portalUser)
+    if(findByAccount) {
+      newUser = await await this.updateUserById(findByAccount, portalUser)
+    } else {
+      const findByName = await this.findByName(portalUser)
+      if(findByName) {
+        newUser = await await this.updateUserById(findByName, portalUser)
+      }
+    }
+
+    if(newUser) {
+      return newUser;
+    }
+      
+    // 都没匹配上则新增
+    newUser = await this.addUser(portalUser)
+  
     return newUser;
     
   }
@@ -100,8 +149,8 @@ class UserService extends Service {
     }
     
   }
-  // 通过邮箱更新
-  async updateUserByEmail(dbUser, portalUser) {
+
+  async updateUserById(dbUser, portalUser) {
     // update usercenter id  by  mail
     const {user_id: portalUserId, name, phone, email, user_name } = portalUser;
     const {user_id: userId} = dbUser;
@@ -113,8 +162,8 @@ class UserService extends Service {
       data = [portalUserId, phone, userId]
     }
     const queryResult = await this.ctx.helper.passportMysqlQuery(sql, data);
-    debugPassportJyb('根据用户中心邮箱匹配更新运营数据 用户中心 %s, 运营中心 %s, 结果 %s', JSON.stringify(portalUser), JSON.stringify(dbUser), JSON.stringify(queryResult))
-    this.ctx.logger.info('根据用户中心邮箱匹配更新运营数据 用户中心 %s, 运营中心 %s, 结果 %s', JSON.stringify(portalUser), JSON.stringify(dbUser), JSON.stringify(queryResult))
+    debugPassportJyb('根据用户中心数据匹配更新运营数据 用户中心 %s, 运营中心 %s, 结果 %s', JSON.stringify(portalUser), JSON.stringify(dbUser), JSON.stringify(queryResult))
+    this.ctx.logger.info('根据用户中心数据匹配更新运营数据 用户中心 %s, 运营中心 %s, 结果 %s', JSON.stringify(portalUser), JSON.stringify(dbUser), JSON.stringify(queryResult))
     if(queryResult && queryResult.affectedRows == 1) {
       return {
         user_name: name,
@@ -126,8 +175,10 @@ class UserService extends Service {
     } else {
       return false;
     }
-    
+
   }
+
+  
   
 }
 

@@ -471,6 +471,22 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
     });
   ```
 
+## 辅助数据
+用户中心用户数据
+user_id:"99"
+user_name:"canye"
+name:"刘XXX"
+create_time:null
+create_user_id:"0"
+email:"xx.wu@jyblife.com"
+identifier:"129"
+is_oa_user:"1"
+phone:"xxxxxx"
+remark:""
+right_codes:null
+role_ids:null
+update_time:"2018-04-13 18:48:58"
+
 ## todo
 
 - 从哪里失效就从哪里去用户中心验证后回来
