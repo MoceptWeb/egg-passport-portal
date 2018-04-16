@@ -25,23 +25,28 @@ module.exports = {
 
   async passportGetUserByIdentifier (portalResult, options) {
       debugPassportJyb('通过用户中心id找运营用户， 用户中心用户信息 %s', JSON.stringify(portalResult))
-      // t_user
-      let dbUserResult = await this.service.portal.user.findByPortalUserId( portalResult.identifier)
+      if(this.app.config.passportJyb.isLoginRelatedOperate) {
+        // t_user
+        let dbUserResult = await this.service.portal.user.findByPortalUserId( portalResult.identifier)
 
-      // 新用户登录： 如果直接通过user_center_id 找不到， 则再次用email验证， 如果email都找不到对应的人， 则在用户中心中查找这个用户的信息，并在运营中心中增加这个user
-      if(!dbUserResult) {
-        dbUserResult = await this.service.portal.user.find2add(portalResult.identifier);
-        debugPassportJyb('新建用户登录 %s', JSON.stringify(dbUserResult))
+        // 新用户登录： 如果直接通过user_center_id 找不到， 则再次用email验证， 如果email都找不到对应的人， 则在用户中心中查找这个用户的信息，并在运营中心中增加这个user
+        if(!dbUserResult) {
+          dbUserResult = await this.service.portal.user.find2add(portalResult.identifier);
+          debugPassportJyb('新建用户登录 %s', JSON.stringify(dbUserResult))
+        }
+    
+        if(!dbUserResult) {
+          // todo 显示更新用户失败？
+          return false;
+        }
       }
-  
-      if(!dbUserResult) {
-        // todo 显示更新用户失败？
-        return false;
-      }
+      
 
       // 获取用户中心用户信息
       const portalUser = await this.service.portal.portal.getUserByUseId(portalResult.identifier)
-      
+      if(!portalResult) {
+        return false;
+      }
       // 将基本信息和ticket结合
       portalResult = Object.assign({}, portalUser, {
         ticket: portalResult

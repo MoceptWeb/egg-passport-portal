@@ -377,6 +377,7 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
      
      ```javascript
     config.passportJyb = {
+      isLoginRelatedOperate: true,   // 在用户中心登录后是否要去在运营中心找相关用户, 默认相关
        clients: {
         mysqlOperate: {
              app: false,   // 是否使用passport插件的mysql连接 来连接运营中心数据库

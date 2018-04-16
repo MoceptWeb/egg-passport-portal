@@ -14,6 +14,7 @@
  */
 
 exports.passportJyb = {
+    isLoginRelatedOperate: true,   // 在用户中心登录后是否要去在运营中心找相关用户
     clients: {
         mysqlOperate: {
             type: 'mysqlOperate',
