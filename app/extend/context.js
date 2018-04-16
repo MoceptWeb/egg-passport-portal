@@ -25,9 +25,10 @@ module.exports = {
 
   async passportGetUserByIdentifier (portalResult, options) {
       debugPassportJyb('通过用户中心id找运营用户， 用户中心用户信息 %s', JSON.stringify(portalResult))
+      let dbUserResult = {}
       if(this.app.config.passportJyb.isLoginRelatedOperate) {
         // t_user
-        let dbUserResult = await this.service.portal.user.findByPortalUserId( portalResult.identifier)
+        dbUserResult = await this.service.portal.user.findByPortalUserId( portalResult.identifier)
 
         // 新用户登录： 如果直接通过user_center_id 找不到， 则再次用email验证， 如果email都找不到对应的人， 则在用户中心中查找这个用户的信息，并在运营中心中增加这个user
         if(!dbUserResult) {
