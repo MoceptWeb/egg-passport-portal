@@ -88,11 +88,7 @@ class UserService extends Service {
    * 3、没有邮箱或邮箱一个都没找到新增
    * @param {*} portalUserId 
    */
-  async find2add(portalUserId) {
-    const portalUser = await this.service.portal.portal.getUserByUseId(portalUserId)
-    if(portalUser === false) {
-      return false;
-    }
+  async find2add(portalUser) {
     let newUser = null;
     if(portalUser.email) {
       const isFindByMail = await this.findByMail(portalUser)
