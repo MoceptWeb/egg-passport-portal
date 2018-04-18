@@ -74,6 +74,11 @@ module.exports = (options, app) => {
           ctx.redirect(getLogin + '?code=-2')
         }
       } else if((code === '-2' ||  code === '-1') && getTicketState === 1) { 
+        // 修复用户中心抽风 -1 时候回到初始页面导致next
+        if(code === '-1') {
+          ctx.redirect(getLogin + '?code=-2')
+          return ;
+        }
         // 这里是getticket 错误或登录失败， 和ticket校验失败的回调地址
         debugPassportJyb(`[egg-passport-jyb] getticket或最终ticket校验失败： 当前url: ${requestUrl}, 跳转的就是当前url， 因为发生此错误一定要去的是登录页面`);
         ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
