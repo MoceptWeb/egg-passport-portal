@@ -70,13 +70,13 @@ module.exports = (options, app) => {
           debugPassportJyb(`[egg-passport-jyb] ticket校验成功： 当前url: ${requestUrl}， 跳转loginIn_redirect_uri： ${loginIn_redirect_uri}`);
           ctx.redirect(loginIn_redirect_uri)
         } else {
-          debugPassportJyb(`[egg-passport-jyb] ticket校验失败： 当前url: ${requestUrl}, 跳转getLogin: ${getLogin + '?code=-2'}`);
-          ctx.redirect(getLogin + '?code=-2')
+          debugPassportJyb(`[egg-passport-jyb] ticket校验失败： 当前url: ${requestUrl}, 跳转getLogin: ${getLogin + '?code=-12'}`);
+          ctx.redirect(getLogin + '?code=-12')
         }
-      } else if((code === '-2' ||  code === '-1') && getTicketState === 1) { 
+      } else if((code === '-2' ||  code === '-1' || code === '-12' || code === '-11') && getTicketState === 1) { 
         // 修复用户中心抽风 -1 时候回到初始页面导致next
         if(code === '-1') {
-          ctx.redirect(getLogin + '?code=-2')
+          ctx.redirect(getLogin + '?code=-11')
           return ;
         }
         // 这里是getticket 错误或登录失败， 和ticket校验失败的回调地址
