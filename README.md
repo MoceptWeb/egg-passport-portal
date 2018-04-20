@@ -246,6 +246,7 @@ see [config/config.default.js](config/config.default.js) for more detail.
 ```
 
 - menu
+nodejs入口页 home.js
 ```javascript
     const menu = await this.ctx.passportGetMenuData(;
 
@@ -392,14 +393,14 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
     }
      ```
     - 关于数据库配置强调说明
-    如果使用方没有连接运营中心数据， 则 
+    如果没有使用连接运营中心数据的数据库， 则 
 
     clients: {
         mysqlOperate: {
              app: true
         }
 
-    如果使用方没有连接运营中心数据， 则 需要看时候是哪个userDBClient 是连接的db， 如果只有一个唯一的数据库连接， 则无需配置任何数据库选项
+    如果使用方已经连接运营中心数据， 则 需要看时候是哪个userDBClient 是连接的db， 如果只有一个唯一的数据库连接， 则无需配置任何数据库选项
     clients: {
         mysqlOperate: {
             'userDBClient': null,     // 如果原系统已经使用连接了运营中心的数据库， 且只有一个连接， 则不配置； 有多个连接则指定db； 且只有在app = true 生效
@@ -449,6 +450,25 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
         }
   ```
 
+  - 关于登录页面已经有session
+
+  自行在登录控制器中加入重定向， 因为插件默认如果有session则全部await next()， 否则登录页面还是可以直接访问
+
+  ```javascript
+    async loginPage() {
+      if(this.ctx.session.passportJyb && this.ctx.session.passportJyb.user_id) {
+        this.ctx.redirect('/');
+        return;
+      }
+
+      await this.ctx.render('login/login', {
+        keywords: '加油宝,管理系统',
+        description: '加油宝管理系统',
+        title: '登录'
+      });
+    }
+  ```
+
   - 菜单获取和基本信息的返回给vue前端
   home.js
   ```javascript
@@ -472,7 +492,7 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
   ```
 
 ## 辅助数据
-用户中心用户数据
+用户中心用户数据结构
 user_id:"99"
 user_name:"canye"
 name:"刘XXX"
