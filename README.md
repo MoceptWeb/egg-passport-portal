@@ -417,7 +417,30 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
         'getLoginOut': '/login/loginOut',  // 本系统登出地址
         'loginIn_redirect_uri': '/',    // 同步登录后的重定向地址redirect_uri
         'noAuth': [/\/login\/doLogin/], // 无需auth验证的api， 默认加入post登录， 否则无法进行自身系统的登录post
-        'getLogin': '/login',    // 本身系统页面登录url, 一般和用户中心配置的登录一致
+        'getLogin': '/login',    // 本身系统页面登录url, 一般和用户中心配置的登录一致,
+        'hook': {
+            /**
+             * 在中间件执行前执行该方法， 如果返回true则直接next执行自己系统的方法
+             * @param {*} ctx 
+             */
+            async before(ctx)  {
+                return false;
+            },
+            /**
+             * 在next前执行的方法
+             * @param {*} ctx 
+             */
+            async after(ctx) {
+                return false;
+            },
+            /**
+             * 没有用户信息且不再无需登录的接口中, 如果返回true则直接停止插件的中间件执行， 使用自身系统
+             * @param {*} ctx 
+             */
+            async logoutCallbackbefore(ctx, next) {
+                return false;
+            }
+        }
     },
     ```
 
@@ -448,6 +471,52 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
           // 登录成功
           this.ctx.body = errCode.LOGIN_SUCCESS;
         }
+  ```
+
+  - 关于在其他页面清空session后本页面的无session控制
+  
+  ```javascript
+  'hook': {
+        async logoutCallbackbefore(ctx) {
+          const {path} = ctx.request;
+          const rules = [/^\/$/, /\/login/, /\/login\/loginOut/]
+          
+          const state = rules.find(rule => {
+            if(rule.test(path)) {
+              return true;
+            }
+          })
+
+          if(!state) {
+            ctx.body = {
+              code: '1601000014',
+              msg: '用户未登录'
+            }
+            return true;
+
+          } else {
+            return false;
+          }
+
+        }
+      }
+  ```
+
+  然后对应前端service.js
+  
+  ```javascript
+   if (code == "1601000014" || code == "1601000013") {
+      Message({
+        message: response.data.msg,
+        type: 'error',
+        duration: 3 * 1000
+      });
+      // 跳转去登录页
+      // location.replace("/login?redirect=" + encodeURIComponent(location.href));
+      location.replace("/login");
+      return Promise.reject();
+    }
+
   ```
 
   - 关于登录页面已经有session
