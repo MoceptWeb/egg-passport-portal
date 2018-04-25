@@ -91,15 +91,26 @@ module.exports = (options, app) => {
           debugPassportJyb(`[egg-passport-jyb] ticket校验失败： 当前url: ${requestUrl}, 跳转getLogin: ${getLogin + '?code=-12'}`);
           ctx.redirect(getLogin + '?code=-12')
         }
-      } else if((code === '-2' ||  code === '-1' || code === '-12' || code === '-11') && getTicketState === 1) { 
+      } else if(code !== '0' && getTicketState === 1) { 
+        //['-2', '-1', '-11', '-12'].indexOf(code) !== -1 
         // 修复用户中心抽风 -1 时候回到初始页面导致next
         if(code === '-1') {
           ctx.redirect(getLogin + '?code=-11')
           return ;
         }
+
         // 这里是getticket 错误或登录失败， 和ticket校验失败的回调地址
         debugPassportJyb(`[egg-passport-jyb] getticket或最终ticket校验失败： 当前url: ${requestUrl}, 跳转的就是当前url， 因为发生此错误一定要去的是登录页面`);
         ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
+
+
+        // 调用用户中心api接口获取错误信息
+        const msg = {
+          errMsg: '用户中心校验错误，请核查相关信息？',
+        }
+
+        await ctx.render(portalConfig.errorPage, msg)
+        return false;
         await customNext(ctx, next, hook) 
 
       } else {

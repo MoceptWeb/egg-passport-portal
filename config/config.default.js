@@ -61,7 +61,8 @@ exports.passportJyb = {
             async logoutCallbackbefore(ctx, next) {
                 return false;
             }
-        }
+        },
+        'errorPage' : 'error/error'
     },
     'cmd': {
         'getTicketByUserId': '80010001',
