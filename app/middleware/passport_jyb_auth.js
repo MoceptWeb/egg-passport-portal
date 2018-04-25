@@ -24,12 +24,24 @@ module.exports = (options, app) => {
    */ 
         
   return async function passportJybAuth(ctx, next) {
+
+    const customNext = async function (ctx, next, hook) {
+      await hook.after(ctx)
+      await next();
+      return false;
+    }
     
     const passportJyb = ctx.session && ctx.session.passportJyb || {};
     const {user_id, user_name, ticket, setLoginState, getTicketState}  = passportJyb;
 
     const {url: requestUrl, path: requestPath, origin: originUrl} = ctx.request;
     const portalConfig= ctx.app.config['passportJyb']['selfSystem']
+    const hook = portalConfig.hook
+
+    if(await hook.before(ctx)) {
+      await customNext(ctx, next, hook) 
+    }
+
     Object.keys(portalConfig).forEach(key => {
       if(['redirect_uri', 'notify_uri', 'loginOut_redirect_uri', 'loginIn_redirect_uri', 'getLogin'].indexOf(key) !== -1 && !/^http/.test(portalConfig[key])) {
         portalConfig[key] = originUrl +  portalConfig[key]
@@ -52,14 +64,20 @@ module.exports = (options, app) => {
         ctx.redirect(setLogOutStateUrl);
       } else {
         // 正常的api
-        await next();
+        await customNext(ctx, next, hook) 
       }
     } else if(ctx.helper.passportIsAllowUrl(noAuth, requestPath)) {
       // 只有登录api不需要session 或配置项
       debugPassportJyb(`[egg-passport-jyb] 无需登录的接口： 当前url: ${requestUrl}`);
       ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb,{getTicketState: null})
-      await next();
+      await customNext(ctx, next, hook) 
+
     } else {
+
+      if(await hook.logoutCallbackbefore(ctx)) {
+         return false;
+      }
+
       // 这里是ticket相关的操作
 
       const {ticket: ticketUrl, code} = ctx.request.query;
@@ -82,7 +100,8 @@ module.exports = (options, app) => {
         // 这里是getticket 错误或登录失败， 和ticket校验失败的回调地址
         debugPassportJyb(`[egg-passport-jyb] getticket或最终ticket校验失败： 当前url: ${requestUrl}, 跳转的就是当前url， 因为发生此错误一定要去的是登录页面`);
         ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
-        await next();
+        await customNext(ctx, next, hook) 
+
       } else {
         // 无ticket直接去用户中心验证
         const ticketUrl = await ctx.service.portal.portal.getTicket({redirect_uri: redirect_uri, notify_uri: notify_uri})

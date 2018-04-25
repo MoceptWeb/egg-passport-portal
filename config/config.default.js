@@ -39,6 +39,29 @@ exports.passportJyb = {
         'noAuth': [/\/login\/doLogin/], // 无需auth验证的api， 默认加入post登录， 否则无法进行自身系统的登录post
         'getLogin': '/login',    // 本身系统页面登录url, 一般和用户中心配置的登录一致
         // 'postlogin' : '/login/doLogin',  // 本系统登录地址
+        'hook': {
+            /**
+             * 在中间件执行前执行该方法， 如果返回true则直接next执行自己系统的方法
+             * @param {*} ctx 
+             */
+            async before(ctx)  {
+                return false;
+            },
+            /**
+             * 在next前执行的方法
+             * @param {*} ctx 
+             */
+            async after(ctx) {
+                return false;
+            },
+            /**
+             * 没有用户信息且不再无需登录的接口中, 如果返回true则直接停止插件的中间件执行， 使用自身系统
+             * @param {*} ctx 
+             */
+            async logoutCallbackbefore(ctx, next) {
+                return false;
+            }
+        }
     },
     'cmd': {
         'getTicketByUserId': '80010001',
