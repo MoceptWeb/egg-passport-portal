@@ -155,6 +155,22 @@ class PortalService extends Service {
 
   }
 
+  async codeMap() {
+    const portalConfig= this.app.config['passportJyb']
+   
+    const param = {
+      "cmd": portalConfig.cmd['codeMap']
+      }
+
+    const result = await  this.ctx.helper.passportSendNormalRequest(portalConfig['portal']['portal_url'], param)
+
+
+    if(!result || result.code !== 0) {
+      return false;
+    }
+    return result.data;
+  }
+
   // 获取业务系统授权用户列表
 
 }

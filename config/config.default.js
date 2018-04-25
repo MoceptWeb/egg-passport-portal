@@ -69,8 +69,8 @@ exports.passportJyb = {
         'verifyTicket': '80010002',
         'getTokenByUsername': '80010003',
         'getUserByUseId': '80010004',
+        'codeMap': '80010006'
      },
-
 
     'menu': {
     },

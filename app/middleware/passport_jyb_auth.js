@@ -103,13 +103,13 @@ module.exports = (options, app) => {
         debugPassportJyb(`[egg-passport-jyb] getticket或最终ticket校验失败： 当前url: ${requestUrl}, 跳转的就是当前url， 因为发生此错误一定要去的是登录页面`);
         ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
 
-
+        const codeInfo = await ctx.service.portal.codeInfo();
         // 调用用户中心api接口获取错误信息
-        const msg = {
-          errMsg: '用户中心校验错误，请核查相关信息？',
-        }
-
-        await ctx.render(portalConfig.errorPage, msg)
+        const errMsg = codeInfo[code] || '用户中心未知错误，请联系相关人员';
+      
+        await ctx.render(portalConfig.errorPage, {
+          errMsg: errMsg
+        })
         return false;
         await customNext(ctx, next, hook) 
 
