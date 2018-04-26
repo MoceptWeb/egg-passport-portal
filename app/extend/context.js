@@ -17,8 +17,8 @@ module.exports = {
   },
   async passportLoginByTicket(ticket, user, options) {
     const verifyTicket = await this.service.portal.portal.verifyTicket(ticket);
-    if(!verifyTicket) {
-      return false;
+    if(verifyTicket.success === false) {
+      return verifyTicket;
     }
     verifyTicket.ticket = ticket;
     const dbUser = await this.passportGetUserByIdentifier(verifyTicket, options)
@@ -138,11 +138,6 @@ module.exports = {
     })
     }
     return menuMain
-  },
-
-  async passportRenderError() {
-    const error = fs.readFileSync('../../view/error/error.nj', 'utf-8') 
-    return error;
   }
 
 };
