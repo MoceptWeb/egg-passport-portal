@@ -409,7 +409,7 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
    - 关于用户中心配置子系统登录url问题, 以及自身系统和登录相关的url配置
      - 如果用户中心配置子系统url， 则跳转用户中心登录
      - 否则
-     ```
+     ```javascript
      'selfSystem': {  
         'notify_uri': '/',   // 在通过getTicket方法中，如果登录则是在用户中心生成Ticket之后的通知（回调）地址 ， 没有登录则是跳转到用户中心配置的login或用户中心登录页面输入用户名密码登录后的回调地址
         'redirect_uri': '/',    //在通过getTicket方法中，透传返回的url参数中的redirect_uri
@@ -439,7 +439,20 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
              */
             async logoutCallbackbefore(ctx, next) {
                 return false;
+            },
+            /**
+             * 返回true则不继续执行
+             * @param {} ctx 
+             * @param {*} next 
+             * @param {*} errMsg 
+             */
+            async errorPage(ctx, next, errMsg) {
+                await ctx.render('error/error', {
+                    errMsg: errMsg
+                })
+                return true;
             }
+        },
         }
     },
     ```
