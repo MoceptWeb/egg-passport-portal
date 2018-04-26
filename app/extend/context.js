@@ -15,8 +15,8 @@ module.exports = {
   },
   async passportLoginByTicket(ticket, user, options) {
     const verifyTicket = await this.service.portal.portal.verifyTicket(ticket);
-    if(!verifyTicket) {
-      return false;
+    if(!verifyTicket.success) {
+      return verifyTicket;
     }
     verifyTicket.ticket = ticket;
     const dbUser = await this.passportGetUserByIdentifier(verifyTicket, options)

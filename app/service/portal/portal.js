@@ -49,7 +49,10 @@ class PortalService extends Service {
     this.ctx.logger.info('校验ticket, 结果是 %s', JSON.stringify(result))
 
     if(!result || result.code !== 0) {
-      return false;
+      return {
+        success: false,
+        msg: result && result.msg || ''
+      };
     }
     return result.data;
   }

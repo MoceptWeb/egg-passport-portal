@@ -83,13 +83,17 @@ module.exports = (options, app) => {
       const {ticket: ticketUrl, code} = ctx.request.query;
       if(ticketUrl && code === '0' && getTicketState === 1) {
         const verifyTicket = await ctx.passportLoginByTicket(ticketUrl);
-        if(verifyTicket) {
+        if(verifyTicket && verifyTicket.success !== false) {
           ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 2})
           debugPassportJyb(`[egg-passport-jyb] ticket校验成功： 当前url: ${requestUrl}， 跳转loginIn_redirect_uri： ${loginIn_redirect_uri}`);
           ctx.redirect(loginIn_redirect_uri)
         } else {
-          debugPassportJyb(`[egg-passport-jyb] ticket校验失败： 当前url: ${requestUrl}, 跳转getLogin: ${getLogin + '?code=-100'}`);
-          ctx.redirect(getLogin + '?code=-100')
+          debugPassportJyb(`[egg-passport-jyb] ticket校验失败： 当前url: ${requestUrl}, `);
+          if(await hook.errorPage(ctx, next, verifyTicket.msg)) {
+            return false;
+          } else {
+            await customNext(ctx, next, hook) 
+          }
         }
       } else if(code !== '0' && getTicketState === 1) { 
         //['-2', '-1', '-11', '-12'].indexOf(code) !== -1 
