@@ -79,8 +79,8 @@ module.exports = (options, app) => {
       }
 
       // 这里是ticket相关的操作
-
-      const {ticket: ticketUrl, code} = ctx.request.query;
+      // notify_uriUrl 存在则是回调的地址
+      const {ticket: ticketUrl, code, notify_uri: notify_uriUrl} = ctx.request.query;
       if(ticketUrl && code === '0' && getTicketState === 1) {
         const verifyTicket = await ctx.passportLoginByTicket(ticketUrl);
         if(verifyTicket && verifyTicket.success !== false) {
@@ -89,7 +89,6 @@ module.exports = (options, app) => {
           ctx.redirect(loginIn_redirect_uri)
         } else {
           debugPassportJyb(`[egg-passport-jyb] ticket校验失败： 当前url: ${requestUrl}, `);
-          ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
           if(await hook.errorPage(ctx, next, {msg: verifyTicket.msg})) {
             return false;
           } else {
@@ -108,6 +107,12 @@ module.exports = (options, app) => {
         debugPassportJyb(`[egg-passport-jyb] getticket或最终ticket校验失败： 当前url: ${requestUrl}, 跳转的就是当前url， 因为发生此错误一定要去的是登录页面`);
         ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
 
+        // code = -2 是配置了自己登录页面的显示
+        if(code === '-2') {
+          await hook.after(ctx)
+          await next();
+          return false;
+        }
       
         if(await hook.errorPage(ctx, next, {code})) {
           return false;
