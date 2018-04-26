@@ -89,6 +89,7 @@ module.exports = (options, app) => {
           ctx.redirect(loginIn_redirect_uri)
         } else {
           debugPassportJyb(`[egg-passport-jyb] ticket校验失败： 当前url: ${requestUrl}, `);
+          ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
           if(await hook.errorPage(ctx, next, {msg: verifyTicket.msg})) {
             return false;
           } else {
