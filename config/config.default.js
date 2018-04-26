@@ -60,9 +60,20 @@ exports.passportJyb = {
              */
             async logoutCallbackbefore(ctx, next) {
                 return false;
+            },
+            /**
+             * 返回true则不继续执行
+             * @param {} ctx 
+             * @param {*} next 
+             * @param {*} errMsg 
+             */
+            async errorPage(ctx, next, errMsg) {
+                await ctx.render('error/error', {
+                    errMsg: errMsg
+                })
+                return true;
             }
         },
-        'errorPage' : 'error/error'
     },
     'cmd': {
         'getTicketByUserId': '80010001',

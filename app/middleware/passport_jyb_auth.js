@@ -88,16 +88,16 @@ module.exports = (options, app) => {
           debugPassportJyb(`[egg-passport-jyb] ticket校验成功： 当前url: ${requestUrl}， 跳转loginIn_redirect_uri： ${loginIn_redirect_uri}`);
           ctx.redirect(loginIn_redirect_uri)
         } else {
-          debugPassportJyb(`[egg-passport-jyb] ticket校验失败： 当前url: ${requestUrl}, 跳转getLogin: ${getLogin + '?code=-12'}`);
-          ctx.redirect(getLogin + '?code=-12')
+          debugPassportJyb(`[egg-passport-jyb] ticket校验失败： 当前url: ${requestUrl}, 跳转getLogin: ${getLogin + '?code=-100'}`);
+          ctx.redirect(getLogin + '?code=-100')
         }
       } else if(code !== '0' && getTicketState === 1) { 
         //['-2', '-1', '-11', '-12'].indexOf(code) !== -1 
         // 修复用户中心抽风 -1 时候回到初始页面导致next
-        if(code === '-1') {
-          ctx.redirect(getLogin + '?code=-11')
-          return ;
-        }
+        // if(code === '-1') {
+        //   ctx.redirect(getLogin + '?code=--100')
+        //   return ;
+        // }
 
         // 这里是getticket 错误或登录失败， 和ticket校验失败的回调地址
         debugPassportJyb(`[egg-passport-jyb] getticket或最终ticket校验失败： 当前url: ${requestUrl}, 跳转的就是当前url， 因为发生此错误一定要去的是登录页面`);
@@ -107,12 +107,11 @@ module.exports = (options, app) => {
         // 调用用户中心api接口获取错误信息
         const errMsg = codeInfo[code] || '用户中心未知错误，请联系相关人员';
       
-        await ctx.render(portalConfig.errorPage, {
-          errMsg: errMsg
-        })
-        return false;
-        await customNext(ctx, next, hook) 
-
+        if(await hook.errorPage(ctx, next, errMsg)) {
+          return false;
+        } else {
+          await customNext(ctx, next, hook) 
+        }
       } else {
         // 无ticket直接去用户中心验证
         const ticketUrl = await ctx.service.portal.portal.getTicket({redirect_uri: redirect_uri, notify_uri: notify_uri})
