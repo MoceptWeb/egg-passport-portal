@@ -48,7 +48,7 @@ module.exports = (options, app) => {
       }
     });
     const {redirect_uri, notify_uri, loginOut_redirect_uri, loginIn_redirect_uri, getLogin,  getLoginOut, noAuth } = portalConfig;
-  
+
     if((user_id && user_name)) {
       if(setLoginState !== 1) {
         // 同步登陆
@@ -91,7 +91,7 @@ module.exports = (options, app) => {
           debugPassportJyb(`[egg-passport-jyb] ticket校验失败： 当前url: ${requestUrl}, 跳转getLogin: ${getLogin + '?code=-100'}`);
           ctx.redirect(getLogin + '?code=-100')
         }
-      } else if(code !== '0' && getTicketState === 1) { 
+      } else if(code && code !== '0' && getTicketState === 1) { 
         //['-2', '-1', '-11', '-12'].indexOf(code) !== -1 
         // 修复用户中心抽风 -1 时候回到初始页面导致next
         // if(code === '-1') {
@@ -103,11 +103,8 @@ module.exports = (options, app) => {
         debugPassportJyb(`[egg-passport-jyb] getticket或最终ticket校验失败： 当前url: ${requestUrl}, 跳转的就是当前url， 因为发生此错误一定要去的是登录页面`);
         ctx.session.passportJyb = Object.assign({}, ctx.session.passportJyb, {getTicketState: 0}) 
 
-        const codeInfo = await ctx.service.portal.portal.codeMap();
-        // 调用用户中心api接口获取错误信息
-        const errMsg = codeInfo[code] || '用户中心未知错误，请联系相关人员';
       
-        if(await hook.errorPage(ctx, next, errMsg)) {
+        if(await hook.errorPage(ctx, next, {code})) {
           return false;
         } else {
           await customNext(ctx, next, hook) 

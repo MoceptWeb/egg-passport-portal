@@ -1,5 +1,6 @@
 'use strict';
-
+const fs = require('fs');
+const path = require('path');
 /**
  * egg-passport-jyb default config
  * @member Config#passportJyb
@@ -67,10 +68,23 @@ exports.passportJyb = {
              * @param {*} next 
              * @param {*} errMsg 
              */
-            async errorPage(ctx, next, errMsg) {
-                await ctx.render('error/error', {
-                    errMsg: errMsg
-                })
+            async errorPage(ctx, next, {code, msg}) {
+                let errMsg = ''
+                if(!msg) {
+                    const codeInfo = await ctx.service.portal.portal.codeMap();
+                    // 调用用户中心api接口获取错误信息
+                    errMsg = codeInfo[code] || '用户中心未知错误，请联系相关人员';
+                } else {
+                    errMsg = msg
+                }
+                const errorPage = fs.readFileSync(path.join(__dirname,'../app/view/error/error.nj'), 'utf-8') 
+
+                ctx.body = await ctx.renderString(errorPage, {errMsg}, {
+                    viewEngine: 'nunjucks',
+                  });
+                // await ctx.render('error/error', {
+                //     errMsg: errMsg
+                // })
                 return true;
             }
         },

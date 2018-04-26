@@ -1,5 +1,7 @@
 'use strict';
 const debugPassportJyb = require('debug')('passportJyb')
+const fs = require('fs');
+const path = require('path');
 
 module.exports = {
 
@@ -137,6 +139,11 @@ module.exports = {
     }
     return menuMain
   },
+
+  async passportRenderError() {
+    const error = fs.readFileSync('../../view/error/error.nj', 'utf-8') 
+    return error;
+  }
 
 };
 
