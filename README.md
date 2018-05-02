@@ -532,6 +532,13 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
 
   ```
 
+  - 关于https访问等nginx
+     - 需要在nginx中https部分中配置
+
+       proxy_set_header is_https  1; 来识别跳转https
+     - 需要配置nginx  host
+     
+       来正确识别访问的host
   - 关于登录页面已经有session
 
   自行在登录控制器中加入重定向， 因为插件默认如果有session则全部await next()， 否则登录页面还是可以直接访问

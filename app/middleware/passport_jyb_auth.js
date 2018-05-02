@@ -42,9 +42,16 @@ module.exports = (options, app) => {
       await customNext(ctx, next, hook) 
     }
 
+    let visitUrl = '';
+    if(ctx.request.header && (ctx.request.header.is_https === 1 || ctx.request.header.is_https === '1')) {
+      visitUrl = 'https://' + ctx.request.host
+    } else {
+      visitUrl = 'http://' + ctx.request.host
+    }
+
     Object.keys(portalConfig).forEach(key => {
       if(['redirect_uri', 'notify_uri', 'loginOut_redirect_uri', 'loginIn_redirect_uri', 'getLogin'].indexOf(key) !== -1 && !/^http/.test(portalConfig[key])) {
-        portalConfig[key] = originUrl +  portalConfig[key]
+        portalConfig[key] = visitUrl +  portalConfig[key]
       }
     });
     const {redirect_uri, notify_uri, loginOut_redirect_uri, loginIn_redirect_uri, getLogin,  getLoginOut, noAuth } = portalConfig;
