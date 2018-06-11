@@ -90,7 +90,7 @@ module.exports = {
     } 
     3 是tree， 区分父子  [{menu_code: '', children: []}]
    */
-  async passportGetMenu(userId, type = 3) {
+  async passportGetMenu(userId, menu_code, type = 3) {
     if(!userId) {
       if(this.session.passportJyb && this.session.passportJyb.operateUser) {
         userId = this.session.passportJyb.operateUser.userId
@@ -99,8 +99,8 @@ module.exports = {
       }
     }
     // 假如 我们拿到用户 id 从数据库获取用户详细信息
-    const menuLevel1 = await this.service.portal.menu.getMenu1(userId)
-    const menuLevel2 = await this.service.portal.menu.getMenu2(userId)
+    const menuLevel1 = await this.service.portal.menu.getMenu1(userId, menu_code)
+    const menuLevel2 = await this.service.portal.menu.getMenu2(userId, menu_code)
     let menuMain = [];
     if(type === 1) {
       let  itemMain = {};

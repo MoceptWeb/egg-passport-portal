@@ -564,7 +564,13 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
     const operateUser = this.ctx.session.passportJyb.operateUser;
 
     const menu = await this.ctx.passportGetMenu(); 
-    
+    // 被动登录的session.useid 赋值
+    if(!this.ctx.session.userid) {
+      this.ctx.session.userid = operateUser.userId;
+      this.ctx.session.userName = operateUser.userName;
+      this.ctx.session.userAccount = operateUser.userAccount;
+      this.ctx.session.userEmail = operateUser.email;
+    }
     const userInfo = {
       userid: operateUser.userId,
       userName: operateUser.userName,

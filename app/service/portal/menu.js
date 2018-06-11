@@ -11,8 +11,9 @@ class MenuService extends Service {
    * @param {*} user 
    * @param {*} pwd sha1 版本的password
    */
-  async getMenu1(userId) {
-    const {menu_code} = this.app.config['passportJyb']
+  async getMenu1(userId, menu_code) {
+    menu_code = menu_code || this.app.config['passportJyb'].menu_code;
+    // const {menu_code} = this.app.config['passportJyb']
     // 假如 我们拿到用户 id 从数据库获取用户详细信息
     const sql = `select * from t_sys_menu menu where exists (
       select 1 from t_sys_menu menu1 join t_privilege priv 
@@ -30,8 +31,8 @@ class MenuService extends Service {
     return queryResult;
   }
 
-  async getMenu2(userId) {
-    const {menu_code} = this.app.config['passportJyb']
+  async getMenu2(userId, menu_code) {
+    menu_code = menu_code || this.app.config['passportJyb'].menu_code
     const sql = `select * from t_sys_menu menu where exists(
       select 1 from t_privilege priv join t_role_priv r_priv on priv.priv_id= r_priv.priv_id
         join t_user_role role on role.role_id = r_priv.role_id
