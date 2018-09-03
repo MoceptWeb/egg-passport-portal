@@ -158,6 +158,26 @@ class PortalService extends Service {
 
   }
 
+  // 获取用户中心授权列表用户
+  async getAuthUserList() {
+    const portalConfig= this.app.config['passportJyb']
+    const {cmd, client_id, secret_key}  =  portalConfig;
+    const secret_key2 = md5(client_id + '-' + secret_key);
+    
+    // 获取目标环境IP和微服务信息
+    const param = {
+      "cmd": portalConfig.cmd['getAuthUserList'],
+      "data": {
+          "client_id": client_id,
+          "secret_key": secret_key2
+        }
+      }
+    const result = await  this.ctx.helper.passportSendNormalRequest(portalConfig['portal']['portal_url'], param)
+    debugPassportJyb('通过用户中心id获取用户中心用户信息, 结果是 %s', JSON.stringify(result))
+    
+    return result.data;
+  }
+
   async codeMap() {
     const portalConfig= this.app.config['passportJyb']
    
