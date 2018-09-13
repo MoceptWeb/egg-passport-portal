@@ -142,6 +142,7 @@ exports.passportJyb = {
  */
 
 exports.passportJyb = {
+    // useMiddleware:    //是否使用中间件
     clients: {
         mysqlOperate: {
              app: false,   // 是否使用passport插件的mysql连接 来连接运营中心数据库
