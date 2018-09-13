@@ -5,6 +5,7 @@ const path = require('path');
 
 module.exports = {
 
+  
   async passportLogin(user, options) {
 
     let portalResult = await this.service.portal.portal.getTokenByUsername(user)
@@ -90,7 +91,18 @@ module.exports = {
     } 
     3 是tree， 区分父子  [{menu_code: '', children: []}]
    */
-  async passportGetMenu(userId, menu_code, type = 3) {
+  async passportGetMenu(userId, menu_code, type = 3, portUserId) {
+
+    if(portUserId) {
+      const dbUserResult = await this.service.portal.user.findByPortalUserId(portUserId)
+
+      // 新用户登录： 如果直接通过user_center_id 找不到， 则再次用email验证， 如果email都找不到对应的人， 则在用户中心中查找这个用户的信息，并在运营中心中增加这个user
+      if(!dbUserResult) {
+        return [];
+      } else {
+        userId = dbUserResult.user_id;
+      }
+    }
     if(!userId) {
       if(this.session.passportJyb && this.session.passportJyb.operateUser) {
         userId = this.session.passportJyb.operateUser.userId

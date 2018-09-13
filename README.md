@@ -249,7 +249,7 @@ see [config/config.default.js](config/config.default.js) for more detail.
 - menu
 nodejs入口页 home.js
 ```javascript
-    const menu = await this.ctx.passportGetMenuData(;
+    const menu = await this.ctx.passportGetMenuData();
 
     await this.ctx.render('layout/layout', {
       keywords: '加油宝,小贷,管理系统',
@@ -565,6 +565,7 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
     const operateUser = this.ctx.session.passportJyb.operateUser;
 
     const menu = await this.ctx.passportGetMenu(); 
+    //  const menu = await this.ctx.passportGetMenu('', '', 3, portUserId)
     // 被动登录的session.useid 赋值
     if(!this.ctx.session.userid) {
       this.ctx.session.userid = operateUser.userId;
