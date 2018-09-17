@@ -95,7 +95,9 @@ exports.passportJyb = {
         'getTokenByUsername': '80010003',
         'getUserByUseId': '80010004',
         'getAuthUserList': '80010005',
-        'codeMap': '80010006'
+        'codeMap': '80010006',
+        'getUserAuth': '80010007',
+        'getUserMenu': '80010008'
      },
 
     'menu': {
