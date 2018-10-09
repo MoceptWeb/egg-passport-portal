@@ -1,112 +1,5 @@
 # egg-passport-jyb
 
-## 如果需要使用该npm接入用户中心，请直接看下方 ```接入流程``` 步骤
-
-- 调试
-```
-    "debug": "DEBUG=passportJyb egg-bin debug",
-```
-
-通用的和用户中心交互， 以及获取在运用中心的配置的用户菜单权限
-- 用户中心
-  - 用户中心登录
-    登录完后重定向到用户中心同步登录
-  - 新的用户中心用户用该npm的处理
-    新用户登录： 如果直接通过user_center_id 找不到， 则再次用email验证， 如果email都找不到对应的人， 则在用户中心中查找这个用户的信息，并在运营中心中增加这个user
-    
-- 运营中心菜单获取
-
-
-
-## 准备工作
-
-- 菜单数据的生成
-1. 先让运营中心对应负责人(刘永康)增加该系统的sys_code
-- 'loan_manage' => '后台管理系统'
-
-2. 新增一级和二级菜单
-*** 新增的菜单的menu_code 请确保在单个系统内部是唯一的！！！， 而且该信息请必须和前端配置的路由信息一致！！！！***
-
-menu_type:    1 父菜单  2 子菜单    3 按钮
-menu_status   1 显示   2 隐藏    
-menu_order:    
-menu_code:  只有16个char
-
-
-- 一级菜单
-
-```sql
-USE db_jyb_test;
-DELETE FROM `db_jyb_test`.`t_sys_menu` WHERE sys_code='loan_manage';
-
-INSERT INTO `db_jyb_test`.`t_sys_menu`( `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (NULL, 'lmfqhkgl', '#', '分期还款管理', '1', '1', 0, 'loan_manage', NULL);
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (NULL, 'lmfqxsgl', '#', '分期信审管理', '1', '1', 1, 'loan_manage', NULL);
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (NULL, 'lmfqyhgl', '#', '分期用户管理', '1', '1', 2, 'loan_manage', NULL);
-
-```
-
-- 二级菜单
-```sql
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'lmddlb', '/order/orderList', '订单列表', '2', '1', 0, 'loan_manage', NULL FROM t_sys_menu WHERE menu_code ='lmfqhkgl' AND sys_code='loan_manage';
-
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'lmxslb', '/credit/list', '信审列表', '2', '1', 0, 'loan_manage', NULL FROM t_sys_menu WHERE menu_code ='lmfqxsgl' AND sys_code='loan_manage';
-
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'lmyhlb', '/user/list', '用户列表', '2', '1', 1, 'loan_manage', NULL FROM t_sys_menu WHERE menu_code ='lmfqyhgl' AND sys_code='loan_manage';
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'lmsxlb', '/user/creditList', '授信列表', '2', '1', 2, 'loan_manage', NULL FROM t_sys_menu WHERE menu_code ='lmfqyhgl' AND sys_code='loan_manage';
-
-```
-- 权限
-```sql
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('loan_manage', '小贷管理系统', '1');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('lmfqhkgl', '分期还款管理', '1');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('lmddlb', '订单列表', '2');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('lmfqxsgl', '分期信审管理', '1');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('lmxslb', '信审列表', '2');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('lmfqyhgl', '分期用户管理', '1');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('lmyhlb', '用户列表', '2');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('lmsxlb', '授信列表', '2');
-```
-- 原始可回滚数据
-```SQL
------ 下面是可以回滚的
-SELECT menu_id FROM t_sys_menu WHERE menu_code ='lmfqhkgl' AND sys_code='loan_manage'
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`menu_id`, `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (471, NULL, 'lmfqhkgl', '#', '分期还款管理', '1', '1', 0, 'loan_manage', NULL);
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`menu_id`, `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (473, NULL, 'lmfqxsgl', '#', '分期信审管理', '1', '1', 1, 'loan_manage', NULL);
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`menu_id`, `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (475, NULL, 'lmfqyhgl', '#', '分期用户管理', '1', '1', 2, 'loan_manage', NULL);
-
------ 下面是可以回滚的
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`menu_id`, `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (472, 471, 'lmddlb', '/order/orderList', '订单列表', '2', '1', 0, 'loan_manage', NULL);
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`menu_id`, `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (474, 473, 'lmxslb', '/credit/list', '信审列表', '2', '1', 0, 'loan_manage', NULL);
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`menu_id`, `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (476, 471, 'lmyhlb', '/user/list', '用户列表', '2', '1', 1, 'loan_manage', NULL);
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`menu_id`, `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (477, 475, 'lmsxlb', '/user/creditList', '授信列表', '2', '1', 2, 'loan_manage', NULL);
-```
-
-                           
-- 查询
-  ```sql
-  // 一级菜单
-  select * from t_sys_menu menu where exists (
-      select 1 from t_sys_menu menu1 join t_privilege priv 
-        on menu1.menu_code = priv.priv_code
-        join t_role_priv r_priv on priv.priv_id= r_priv.priv_id
-        join t_user_role role on role.role_id = r_priv.role_id
-        where role.user_id =186 and menu1.menu_code = priv.priv_code
-        and menu1.menu_status=1 and sys_code='loan_manage' and menu1.menu_type=2
-        and menu.menu_id= menu1.p_menu_id	
-    ) and menu_status=1 and sys_code='loan_manage' and menu_type=1  order by menu_order;
-
-   // 二级菜单
-    select * from t_sys_menu menu where exists(
-      select 1 from t_privilege priv join t_role_priv r_priv on priv.priv_id= r_priv.priv_id
-        join t_user_role role on role.role_id = r_priv.role_id
-         where role.user_id =186 and menu.menu_code = priv.priv_code
-        ) and menu_status=1 and sys_code='loan_manage' and menu_type=2  order by menu_order;
-  ```
-
-- user_center_id的同步和使用
-通过portaltShell 脚本
-
-
 - 代码修改部分
 
   - 前端需要更改md5方式登录
@@ -142,7 +35,7 @@ exports.passportJyb = {
  */
 
 exports.passportJyb = {
-    // useMiddleware:    //是否使用中间件
+    useMiddleware:   false //是否使用中间件
     clients: {
         mysqlOperate: {
              app: false,   // 是否使用passport插件的mysql连接 来连接运营中心数据库
@@ -301,61 +194,6 @@ npm中 处理
 
 
 # 接入流程
-以lego为例
-## 数据类
-- 脚本portShell 同步（提前已经做好）
-oa数据、用户中心、运营数据的同步
-
-- 菜单的新增（可以使用sql新增， 也可以自行在运行系统中新增）
-DELETE FROM `db_jyb_test`.`t_sys_menu` WHERE sys_code='lego_manage';
-
-```SQL
- /* 一级菜单*/
-INSERT INTO `db_jyb_test`.`t_sys_menu`( `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (NULL, 'act', '#', '活动配置管理', '1', '1', 0, 'lego_manage', 'iconfont icon-lihe');
-INSERT INTO `db_jyb_test`.`t_sys_menu`( `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (NULL, 'legoFE', '#', '页面配置管理', '1', '1', 1, 'lego_manage', 'iconfont icon-lihe');
-INSERT INTO `db_jyb_test`.`t_sys_menu`( `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (NULL, 'template', '#', '组件模板管理', '1', '1', 2, 'lego_manage', 'iconfont icon-guanzhu');
-INSERT INTO `db_jyb_test`.`t_sys_menu`( `p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) VALUES (NULL, 'entry', '#', '活动入口配置', '1', '1', 3, 'lego_manage', 'iconfont icon-ziyouhuodong');
-
-/* 二级菜单 */
-/* 活动配置管理 /act act  : 活动列表 /act/list  actList  新增活动  /act/edit newAct 命令字列表 /act/cmdList cmdList 规则/动作列表 /act/paramsList  filterList
-*/  
-
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'actList', '/act/list', '活动列表', '2', '1', 1, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='act' AND sys_code='lego_manage';
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'newAct', '/act/edit', '新增活动', '2', '1', 2, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='act' AND sys_code='lego_manage';
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'cmdList', '/act/cmdList', '命令字列表', '2', '1', 3, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='act' AND sys_code='lego_manage';
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'filterList', '/act/paramsList', '规则/动作列表', '2', '1', 4, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='act' AND sys_code='lego_manage';
-/* 组件模板管理 /template template : 规则树模板列表 /template/templateList  templateList */ 
-
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'templateList', '/template/templateList', '规则树模板列表', '2', '1', 1, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='template' AND sys_code='lego_manage';
-/* 页面配置管理 /lego  legoFE  : 乐高页面列表  /lego/pageList  pageList   乐高组件集合  /lego/componentList componentList */ 
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'pageList', '/lego/pageList', '乐高页面列表', '2', '1', 1, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='legoFE' AND sys_code='lego_manage';
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'componentList', '/lego/componentList', '乐高组件集合', '2', '1', 1, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='legoFE' AND sys_code='lego_manage';
-/* 系统设置  /system system  : 同步配置  /system/sync  systemSync */ 
-
-/*活动入口配置  /entry entry : 入口配置 /entry/list entryList 入口活动列表 /entry/entryActList entryActList */
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'entryList', '/entry/list', '入口配置', '2', '1', 1, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='entry' AND sys_code='lego_manage';
-INSERT INTO `db_jyb_test`.`t_sys_menu`(`p_menu_id`, `menu_code`, `menu_url`, `menu_name`, `menu_type`, `menu_status`, `menu_order`, `sys_code`, `icon_name`) SELECT menu_id, 'entryActList', '/entry/entryActList', '入口活动列表', '2', '1', 2, 'lego_manage', NULL FROM t_sys_menu WHERE menu_code ='entry' AND sys_code='lego_manage';
-
-
-/* 权限*/
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('lego_manage', '乐高管理系统', '1');
-
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('act', '活动配置管理', '1');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('legoFE', '页面配置管理', '1');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('template', '组件模板管理', '1');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('entry', '活动入口配置', '1');
-
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('actList', '活动列表', '2');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('newAct', '新增活动', '2');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('cmdList', '命令字列表', '2');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('filterList', '规则/动作列表', '2');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('templateList', '规则树模板列表', '2');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('pageList', '乐高页面列表', '2');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('componentList', '乐高组件集合', '2');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('entryList', '入口配置', '2');
-INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) VALUES ('entryActList', '入口活动列表', '2');
-
-```
 
 - 用户中心对应client_id和secret_key的生成
 请在用户中心对应环境新增自己的系统， 并在passport的config中对应配置
@@ -565,7 +403,7 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
     const operateUser = this.ctx.session.passportJyb.operateUser;
 
     const menu = await this.ctx.passportGetMenu(); 
-    //  const menu = await this.ctx.passportGetMenu('', '', 3, portUserId)
+    // 使用portUserId进行获取菜单 const menu = await this.ctx.passportGetMenu('', '', 3, portUserId)
     // 被动登录的session.useid 赋值
     if(!this.ctx.session.userid) {
       this.ctx.session.userid = operateUser.userId;
@@ -590,6 +428,8 @@ INSERT INTO `db_jyb_test`.`t_privilege`(`priv_code`, `priv_name`, `priv_type`) V
 
 ## 辅助数据
 用户中心用户数据结构
+
+```javascript
 user_id:"99"
 user_name:"canye"
 name:"刘XXX"
@@ -603,11 +443,15 @@ remark:""
 right_codes:null
 role_ids:null
 update_time:"2018-04-13 18:48:58"
+```
 
 ## todo
 
 - 从哪里失效就从哪里去用户中心验证后回来
 - 其他登出了， 该系统的session还在还是先用自己的， 没有被动登出（被动登录做了）
+
+
+# 权限管理
 
 
 
